@@ -19,7 +19,7 @@ This repository documents the complete architecture, API usage, workflow logic, 
 ## 📋 Table of Contents
 
 1. [Introduction](#-introduction)
-2. [System Architecture](#-system-architecture)
+2. [System Architecture](#️-system-architecture)
 3. [Sequence Diagrams](#-workflow-interaction-diagram)
 4. [Environment Variables](#️-environment-variables)
 5. [API Endpoints](#-api-endpoints)
