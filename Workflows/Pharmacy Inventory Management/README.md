@@ -28,7 +28,7 @@ This repository documents the complete architecture, API usage, workflow logic, 
 8. [Node-Level Documentation](#-node-level-documentation)
 9. [Setup Instructions](#️-setup-instructions)
 10. [Deployment Guide](#-deployment-guide)
-11. [Scalability & Limitations](#-scalability--limitations)
+11. [Scalability ](#-scalability)
 12. [Future Improvements](#-future-improvements)
 
 ---
@@ -1300,7 +1300,7 @@ sudo certbot --nginx -d pharmacy.yourdomain.com
 
 ---
 
-## 📈 Scalability & Limitations
+## 📈 Scalability
 
 ### Strengths
 
@@ -1331,45 +1331,6 @@ sudo certbot --nginx -d pharmacy.yourdomain.com
 
 ---
 
-### Limitations
-
-⚠️ **Google Sheets Scalability**
-- Limited to ~10,000 rows per sheet
-- API rate limits (60 requests/minute)
-- Not suitable for real-time high-volume operations
-
-⚠️ **OpenAI API Costs**
-- 3 AI calls per workflow execution
-- GPT-4.1-mini: ~$0.03 per run
-- Daily scheduled runs: ~$11/month
-- Consider caching for repeated alerts
-
-⚠️ **Sequential Processing**
-- Medicines processed one-by-one
-- No parallel evaluation
-- Large inventories (1000+ items) may timeout
-
-⚠️ **No Historical Tracking**
-- No audit trail of past alerts
-- No trend analysis
-- No reporting dashboard
-
-⚠️ **Manual Data Entry**
-- Google Sheets requires manual updates
-- No automatic stock deduction on sales
-- Risk of human error in data entry
-
-⚠️ **Single Execution Model**
-- Must be triggered manually or via scheduler
-- No real-time monitoring
-- No event-driven architecture
-
-⚠️ **Alert Delivery**
-- Currently returns HTML via webhook only
-- No actual Telegram/SMS sending implemented
-- Requires integration with notification services
-
----
 
 ### Performance Considerations
 
