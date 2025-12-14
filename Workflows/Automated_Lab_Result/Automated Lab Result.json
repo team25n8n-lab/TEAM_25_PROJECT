@@ -1,0 +1,303 @@
+{
+  "name": "Automated Lab Result",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/lab-result",
+        "options": {
+          "responseData": "={ \"status\": \"received\", \"message\": \"Lab result uploaded successfully\" }"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        48,
+        160
+      ],
+      "id": "ca92e063-9795-4c07-b230-40a767f07276",
+      "name": "Webhook1",
+      "webhookId": "53d4f25d-d4f6-4377-b126-f90a920e3e69"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = items[0].json.body;\n\nif (!data.file_url) {\n  return [{ json: { error: \"file_url not found\", received: data } }];\n}\n\nconst base64Data = data.file_url.split(',')[1];\nconst fileName = data.file_name || 'output.pdf';\n\nreturn [{\n  binary: {\n    data: {\n      data: Buffer.from(base64Data, 'base64'),\n      mimeType: 'application/pdf',\n      fileName: fileName,\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        272,
+        160
+      ],
+      "id": "90712148-d341-4409-a02f-109e40104c01",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Webhook1').item.json.body.patient_doctor_email }}",
+        "subject": "={{ $json.Subject }}",
+        "message": "={{ $json.Email_Body }}",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {}
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "1a98106d-80b3-4316-a0c0-13ac0a96e9a4",
+      "name": "Email to Doctor",
+      "webhookId": "159ef07c-c682-4a01-874c-8786b241364a",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "jhqSTdUguQruXeFP",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Webhook1').item.json.body.patient_email }}",
+        "subject": "Your Lab Report",
+        "message": "=<!DOCTYPE html> <html lang=\"en\">   <body style=\"font-family: Arial, sans-serif; color: #222;\">     <p>Dear {{ $('Webhook1').item.json.body.patient_name }},</p>      <p>       We are sharing your lab report (Patient ID: <strong>{{ $('Webhook1').item.json.body.patient_id }}</strong>) for your records and review.     </p>      <p>       The report is attached with this email in PDF format. Please go through the results carefully.     </p>      <p>       If you have any questions or require further clarification, kindly reach out to your doctor for guidance.     </p>      <p>       Wishing you good health,<br>       John Cena <br>       Lab Incharge    </p>   </body> </html>",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {}
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        416
+      ],
+      "id": "d40f7766-798f-4407-a3fc-1e2b015163bb",
+      "name": "Email to Patient",
+      "webhookId": "307cf9b4-1c8e-4f84-9f18-a907e8d2c0b6",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "jhqSTdUguQruXeFP",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Here is the lab report of Patient:\nAge: \nSex:\n{{ $json.tests.map(t => `${t.test}: ${t.result} (Ref: ${t.reference})`).join(\"\\n\") }}",
+        "options": {
+          "systemMessage": "You are an AI medical reporting assistant. Your task is to analyze structured lab report data provided in JSON or text format. Always create the email using the exact same HTML structure and styling layout provided below, including containers, header, footer, remarks box, disclaimer, spacing, and the same CSS properties.\nOnly the theme colors may change depending on the severity category (e.g., red for critical, green for normal, orange/yellow for borderline).\nAll other elements of the structure must remain identical.\n\nRULES\n1. Categorize the report into one of three categories:\n\nNormal\n\nBorderline\n\nCritical\n\n**2. Generate a professional email in full HTML format (from <!DOCTYPE html> to </html>) using the exact same structure and styling as the following template:\n\n(You must keep ALL structural items exactly as they are—tags, sections, CSS classes, layout—only change color theme based on severity.)\n\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"UTF-8\" />\n<title>Lab Report Notification</title>\n<style>\n  body {\n    font-family: Arial, sans-serif;\n    background-color: THEME_BACKGROUND;\n    color: THEME_TEXT;\n    margin: 0;\n    padding: 0;\n  }\n  .container {\n    width: 90%;\n    max-width: 600px;\n    margin: 30px auto;\n    border: 2px solid THEME_TEXT;\n    border-radius: 8px;\n    background-color: THEME_BOX;\n    box-shadow: 0 0 10px THEME_SHADOW;\n  }\n  header {\n    background-color: THEME_TEXT;\n    color: white;\n    padding: 15px 20px;\n    border-radius: 8px 8px 0 0;\n    text-align: center;\n    font-size: 1.5em;\n    font-weight: bold;\n  }\n  section {\n    padding: 20px;\n    font-size: 1em;\n    line-height: 1.5em;\n  }\n  .remarks {\n    background-color: THEME_REMARKS_BG;\n    border: 1px solid THEME_TEXT;\n    border-radius: 5px;\n    padding: 15px;\n    margin-top: 15px;\n  }\n  footer {\n    background-color: THEME_TEXT;\n    color: white;\n    text-align: center;\n    padding: 10px 20px;\n    font-size: 0.9em;\n    border-radius: 0 0 8px 8px;\n    margin-top: 20px;\n  }\n  .disclaimer {\n    margin-top: 15px;\n    font-size: 0.85em;\n    color: THEME_TEXT;\n    font-style: italic;\n  }\n</style>\n</head>\n<body>\n  <div class=\"container\">\n    <header>Lab Report Notification</header>\n    <section>\n      <p>Dear Doctor,</p>\n      <p>[Auto-generated interpretive statement]</p>\n      <div class=\"remarks\">\n        <strong>Remarks:</strong>\n        <ul>\n          [List of remarks]\n        </ul>\n      </div>\n      <p>Please interpret the results in the context of the patient's clinical presentation and consider timely intervention if required.</p>\n      <p class=\"disclaimer\">This is an AI generated analysis of the test report and may contain errors.</p>\n    </section>\n    <footer>This report is generated automatically by the lab system</footer>\n  </div>\n</body>\n</html>\n\nTheme Colors to Substitute\n\nCritical:\n\nTHEME_BACKGROUND = #fdecea\n\nTHEME_TEXT = #a94442\n\nTHEME_BOX = #fff0f0\n\nTHEME_SHADOW = #f5c6cb\n\nTHEME_REMARKS_BG = #f9d6d5\n\nNormal:\n\nTHEME_BACKGROUND = #e8f5e9\n\nTHEME_TEXT = #2e7d32\n\nTHEME_BOX = #f1f8f2\n\nTHEME_SHADOW = #c8e6c9\n\nTHEME_REMARKS_BG = #dcedc8\n\nBorderline:\n\nTHEME_BACKGROUND = #fff4e5\n\nTHEME_TEXT = #ef6c00\n\nTHEME_BOX = #fff7eb\n\nTHEME_SHADOW = #ffe0b2\n\nTHEME_REMARKS_BG = #ffe8c9\n\n3. The email must include:\n\nA subject line reflecting severity:\n\nNormal → Lab Report Analysis – Normal Findings\n\nBorderline → Lab Report Analysis – Borderline Values Detected\n\nCritical → Lab Report Analysis – Critical Abnormalities\n\nRemarks section (bullet points)\n\nDisclaimer\n\nFormal tone suitable for a medical professional\n\n4. HTML must always be valid, full, and self-contained.\n5. Output only:\n\nA subject line prefixed with Subject:\n\nA newline\n\nThe full HTML email code\n\nExample format (must always follow this):\n\nSubject: Lab Report Analysis – Critical Abnormalities\n<!DOCTYPE html>\n...\n</html>"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        944,
+        160
+      ],
+      "id": "c5f46f45-ad04-44dd-827e-cf8542e8705d",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        496,
+        160
+      ],
+      "id": "6d8dd8b9-3408-48b1-a8a1-9e28c6f8fac9",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input: items[0].json.text contains the raw report string\n// Output: structured JSON with patient info and test results\n\nconst input = items[0].json.text;\n\n// Split lines and trim\nconst lines = input.split('\\n').map(l => l.trim()).filter(l => l);\n\n// Extract patient info\nconst patient = {\n  name: lines.find(l => l.startsWith(\"Patient Name\"))?.replace(\"Patient Name:\", \"\").trim(),\n  ageSex: lines.find(l => l.startsWith(\"Age/Sex\"))?.replace(\"Age/Sex:\", \"\").trim(),\n  testDate: lines.find(l => l.startsWith(\"Test Date\"))?.replace(\"Test Date:\", \"\").trim(),\n  reportId: lines.find(l => l.startsWith(\"Report ID\"))?.replace(\"Report ID:\", \"\").trim(),\n};\n\n// Extract test results (everything after \"TEST RESULT REFERENCE RANGE\")\nconst startIndex = lines.findIndex(l => l.includes(\"TEST RESULT REFERENCE RANGE\")) + 1;\nconst testLines = lines.slice(startIndex);\n\n// Helper: group lines into [TestName, Result, Reference]\nconst tests = [];\nfor (let i = 0; i < testLines.length; i += 2) {\n  const testName = testLines[i];\n  const parts = testLines[i+1]?.split(/\\s+/) || [];\n  const result = parts[0] + (parts[1] ? \" \" + parts[1] : \"\");\n  const reference = parts.slice(2).join(\" \");\n  tests.push({\n    test: testName,\n    result,\n    reference\n  });\n}\n\nreturn [\n  {\n    json: {\n      tests: tests // instead of [tests]\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        160
+      ],
+      "id": "4849dd1b-4008-47a0-a3f4-580549bbf053",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        944,
+        368
+      ],
+      "id": "8fbff70f-fd2b-41ea-b893-a46968a8fd86",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "jTywaPAPNBFR9V7Y",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input: items[0].json.output contains the raw string with Subject + HTML\n// Output: { Subject: \"...\", Email_Body: \"...\" }\n\nconst raw = items[0].json.output || \"\";\n\n// Split subject and body\nlet subject = \"\";\nlet emailBody = \"\";\n\n// Extract subject line\nconst subjectMatch = raw.match(/Subject:\\s*(.*?)\\n/);\nif (subjectMatch) {\n  subject = subjectMatch[1].trim();\n}\n\n// Extract everything after the subject line\nconst bodyMatch = raw.match(/<!DOCTYPE html[\\s\\S]*<\\/html>/);\nif (bodyMatch) {\n  emailBody = bodyMatch[0].trim();\n}\n\nreturn [\n  {\n    json: {\n      Subject: subject,\n      Email_Body: emailBody\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1296,
+        160
+      ],
+      "id": "7e0f5b4f-5889-4872-8d3f-eabb4b1b2f1d",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "f5e3f078-49fd-4d52-ba63-f9f234d6c386",
+      "name": "Merge"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Email to Patient",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Email to Doctor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a9b4e20e-69b2-4517-a37e-81a209fb6d5e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d6d568813a88aea710aa5796ea28840c458ade99e5fe88b00dc7056afbfca8d0"
+  },
+  "id": "RFlF6CBdA08TUGay",
+  "tags": []
+}
