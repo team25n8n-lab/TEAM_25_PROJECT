@@ -19,16 +19,16 @@ This repository documents the complete architecture, API usage, workflow logic, 
 ## 📋 Table of Contents
 
 1. [Introduction](#-introduction)
-2. [System Architecture](#️-system-architecture)
-3. [Sequence Diagrams](#-workflow-interaction-diagram)
-4. [Environment Variables](#️-environment-variables)
+2. [System Architecture](#-system-architecture)
+3. [Sequence Diagrams](#-sequence-diagrams)
+4. [Environment Variables](#-environment-variables)
 5. [API Endpoints](#-api-endpoints)
 6. [Folder Structure](#-folder-structure)
 7. [Workflow Overview](#-workflow-overview)
 8. [Node-Level Documentation](#-node-level-documentation)
-9. [Setup Instructions](#️-setup-instructions)
+9. [Setup Instructions](#-setup-instructions)
 10. [Deployment Guide](#-deployment-guide)
-11. [Scalability ](#-scalability)
+11. [Scalability & Limitations](#-scalability)
 12. [Future Improvements](#-future-improvements)
 
 ---
@@ -1331,7 +1331,6 @@ sudo certbot --nginx -d pharmacy.yourdomain.com
 
 ---
 
-
 ### Performance Considerations
 
 **Current Setup:**
@@ -1442,96 +1441,25 @@ sudo certbot --nginx -d pharmacy.yourdomain.com
 
 ### Monthly Operating Costs (Estimated)
 
+**n8n Cloud:**
+- Starter Plan: $20/month (2,500 executions)
+- Pro Plan: $50/month (10,000 executions)
 
-## Core Cost Components
+**OpenAI API:**
+- Daily execution: ~$0.03 × 30 = $0.90/month
+- Hourly execution: ~$0.03 × 24 × 30 = $21.60/month
 
-### 1) n8n Cloud
-* **Starter**: $20/month → 2,500 executions
-* **Pro**: $50/month → 10,000 executions
-* **Overage**: Starter $0.008/execution, Pro $0.005/execution
+**Google Sheets API:**
+- Free (within rate limits)
 
-### 2) OpenAI (GPT-4.1-mini)
-* 3 AI calls per check
-* Total tokens per check: ~3,400
-* Cost per check: ≈ $0.0011
+**Total Monthly Cost:**
+- Daily checks: ~$21-$51/month
+- Hourly checks: ~$42-$72/month
 
-### 3) Google Sheets
-* 1 read per check
-* Free within limits
-
-### 4) Data Processing
-* Built into n8n
-* No extra cost
-
-## Per-Execution Cost
-* **Executions**: 1
-* **AI cost**: ~$0.0011
-* **Sheets read**: Free
-* **Processing**: Included
-
-## Monthly Cost Scenarios
-
-### 100 Checks
-* Total cost: $20.11
-* Cost per check: $0.20
-
-### 500 Checks
-* Total cost: $20.55
-* Cost per check: $0.041
-
-### 1,000 Checks
-* Total cost: $21.10
-* Cost per check: $0.021
-
-### 2,000 Checks
-* Total cost: $22.20
-* Cost per check: $0.011
-
-### 5,000 Checks
-* n8n overage applies
-* Total cost: $45.50
-* Cost per check: $0.009
-
-## Scaling Snapshot
-
-| Checks/Month | Executions | Monthly Cost | Plan              |
-|--------------|------------|--------------|-------------------|
-| 100          | 100        | $20.11       | Starter           |
-| 500          | 500        | $20.55       | Starter           |
-| 1,000        | 1,000      | $21.10       | Starter           |
-| 2,000        | 2,000      | $22.20       | Starter           |
-| 5,000        | 5,000      | $45.50       | Starter + overage |
-| 10,000       | 10,000     | ~$61         | Pro               |
-| 20,000+      | 20,000+    | ~$100+       | Pro + overage     |
-
-## ROI Summary
-
-* **Manual cost**: $10–19 per check
-* **Automation**: $0.009–0.20 per check
-* **Savings**: 96–99%
-* **Payback**: Immediate
-
-## Typical Usage
-
-* **Small pharmacy** (2–3 checks/day): ~$20/month
-* **Hospital pharmacy** (hourly checks): ~$26/month
-* **Manual equivalent**: $600–13,680/month
-
-## Recommended Setup
-
-* **n8n Starter**: $20/month
-* **OpenAI**: Pay-as-you-go
-* **Google Sheets**: Free
-* **Starting cost**: ~$20–21/month
-
-### Upgrade Triggers
-
-* **n8n Pro** → >2,500 checks/month
-* **Sheets API upgrade** → rarely needed
-
-## Bottom Line
-
-The Pharmacy Inventory & Expiry Alert system runs for **~$20/month**, costs **under 1 cent per scan at scale**, prevents stock-outs and expiries, and replaces hours of daily manual work with 99% cost reduction and real-time visibility.
+**Cost Optimization:**
+- Use GPT-3.5-turbo instead of GPT-4.1-mini: 90% cost reduction
+- Implement caching: 50-70% execution reduction
+- Self-host n8n: Eliminate $20-50/month subscription
 
 ---
 
