@@ -1,0 +1,1139 @@
+{
+  "name": "Medical Record OCR Automation with Patient Data Extraction and Supabase Integration",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "value": 1,
+              "unit": "minutes"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1yLs2GcD5hfqcZPfpDw9GulbT8IyL8bg0",
+          "mode": "list",
+          "cachedResultName": "Clinic_Records_Raw",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1yLs2GcD5hfqcZPfpDw9GulbT8IyL8bg0"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "id": "5686ff18-8d9a-456a-993b-88eba51dbfe4",
+      "name": "Watch Clinic_Records_Raw Folder",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2384,
+        288
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Mkx5aoXVrkAZIq1U",
+          "name": "Google Drive account project name team project25"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "ocrApiKey",
+              "value": "<__PLACEHOLDER_VALUE__OCR.Space API Key__>",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "supabaseUrl",
+              "value": "<__PLACEHOLDER_VALUE__Supabase Project URL__>",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "supabaseServiceKey",
+              "value": "<__PLACEHOLDER_VALUE__Supabase Service Role Key__>",
+              "type": "string"
+            },
+            {
+              "id": "id-4",
+              "name": "geminiApiKey",
+              "value": "<__PLACEHOLDER_VALUE__Google Gemini API Key__>",
+              "type": "string"
+            },
+            {
+              "id": "id-5",
+              "name": "driveRawFolderId",
+              "value": "<__PLACEHOLDER_VALUE__Google Drive Raw Folder ID__>",
+              "type": "string"
+            },
+            {
+              "id": "id-6",
+              "name": "driveProcessedFolderId",
+              "value": "<__PLACEHOLDER_VALUE__Google Drive Processed Folder ID__>",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "eb8e5627-9cfb-4e6f-8065-7cce045efa44",
+      "name": "Workflow Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2144,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "id-1",
+              "leftValue": "={{ $binary.file.mimeType.includes('pdf') || $binary.file.mimeType.includes('image') }}\n",
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "1058d515-3581-4f17-9368-2660a351284a",
+      "name": "Check File Type (PDF or Image)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1920,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {}
+      },
+      "id": "dd702a23-eb2a-44dc-b667-2bbc53e94f0d",
+      "name": "Download File Binary",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -1696,
+        192
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Mkx5aoXVrkAZIq1U",
+          "name": "Google Drive account project name team project25"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.ocr.space/parse/image",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "=K87043146988957"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "language",
+              "value": "eng"
+            },
+            {
+              "name": "isOverlayRequired",
+              "value": "false"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e94f119c-ba51-4a83-bf6c-b84f9314fc5b",
+      "name": "OCR API Call (OCR.Space)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -1472,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "id-1",
+              "leftValue": "={{ $json.ParsedResults && $json.ParsedResults.length > 0 && !$json.IsErroredOnProcessing }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "96b56636-c560-4587-af0a-7f86b83e1e6e",
+      "name": "Check OCR Success",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1248,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const ocrText = $input.first().json.ParsedResults[0].ParsedText;\nconst cleaned = ocrText\n  .replace(/\\r\\n/g, '\\n')\n  .replace(/\\n{3,}/g, '\\n\\n')\n  .replace(/[ \\t]+/g, ' ')\n  .trim();\n\nreturn [{ json: { ocr_text: cleaned, original_file_name: $('Watch Clinic_Records_Raw Folder').first().json.name, file_id: $('Watch Clinic_Records_Raw Folder').first().json.id } }];"
+      },
+      "id": "eeaddb13-021e-4abe-bb2e-f281c3ab353a",
+      "name": "Clean OCR Text",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1024,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "options": {
+          "temperature": 0
+        }
+      },
+      "id": "f7cd3f6e-e1d3-484c-ab31-ab0f1d2594eb",
+      "name": "Gemini 1.5 Pro Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        304,
+        224
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "pDFcfP5yvzPAuy68",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"document_type\": \"Lab Report\",\n  \"patient_name\": \"John Doe\",\n  \"patient_phone\": \"+1234567890\",\n  \"patient_cnic\": \"12345-1234567-1\",\n  \"doctor_name\": \"Dr. Smith\",\n  \"date\": \"2024-01-15\",\n  \"diagnosis\": \"Type 2 Diabetes\",\n  \"medicines\": [\"Metformin 500mg\", \"Insulin\"],\n  \"tests\": [\"Blood Sugar\", \"HbA1c\"],\n  \"notes\": \"Follow up in 2 weeks\"\n}"
+      },
+      "id": "a7119324-ad6a-420b-96ce-635f751632df",
+      "name": "Medical Record JSON Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -736,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.ocr_text }}",
+        "hasOutputParser": true,
+        "batching": {}
+      },
+      "id": "d1a0b1ec-9621-4e82-a678-94a97d4e9d3f",
+      "name": "Extract Medical Metadata with LLM",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        -800,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "try {\n  const llmOutput = $input.first().json.output;\n  const metadata = typeof llmOutput === 'string' ? JSON.parse(llmOutput) : llmOutput;\n  \n  // Validate required fields\n  const isValid = metadata && \n    (metadata.patient_name || metadata.patient_phone) &&\n    metadata.document_type;\n  \n  return [{\n    json: {\n      isValid,\n      metadata,\n      patient_name: metadata.patient_name || 'Unknown',\n      patient_phone: metadata.patient_phone || null,\n      patient_cnic: metadata.patient_cnic || null,\n      document_type: metadata.document_type,\n      ocr_text: $('Clean OCR Text').first().json.ocr_text,\n      original_file_name: $('Clean OCR Text').first().json.original_file_name,\n      file_id: $('Clean OCR Text').first().json.file_id\n    }\n  }];\n} catch (error) {\n  return [{\n    json: {\n      isValid: false,\n      error: error.message,\n      original_file_name: $('Clean OCR Text').first().json.original_file_name,\n      file_id: $('Clean OCR Text').first().json.file_id\n    }\n  }];\n}"
+      },
+      "id": "1cf411c2-579a-422d-bdc2-cc0736e085c5",
+      "name": "Validate and Parse LLM JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -448,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "id-1",
+              "leftValue": "={{ $json.isValid.toBoolean() }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "bfae46a0-19d1-4ef2-bef5-97db70d0b846",
+      "name": "Check JSON Valid",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -224,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://xhszdmayjbbuuomcbgux.supabase.co/rest/v1/patients",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhoc3pkbWF5amJidXVvbWNiZ3V4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NDIzMzI0OSwiZXhwIjoyMDc5ODA5MjQ5fQ.TNTEUTIGyHi11OAgtmktiC3PcRBCROWz5iLZW3bzrDM"
+            },
+            {
+              "name": "Authorization",
+              "value": "=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhoc3pkbWF5amJidXVvbWNiZ3V4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NDIzMzI0OSwiZXhwIjoyMDc5ODA5MjQ5fQ.TNTEUTIGyHi11OAgtmktiC3PcRBCROWz5iLZW3bzrDM"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates,return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\nJSON.stringify({\nname: $json.patient_name || \"\",\nphone: $json.patient_phone || \"\"\n})\n}}",
+        "options": {}
+      },
+      "id": "94042c2d-5ea4-4739-8232-e65cde213ffa",
+      "name": "Upsert Patient in Supabase",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Validate and Parse LLM JSON').first().json.ocr_text }}",
+        "batching": {}
+      },
+      "id": "aed4f289-ded1-4a8a-8333-0f0ccdcbc7e3",
+      "name": "Generate Document Summary",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "patient_id",
+              "value": "={{ $json[0].id }}",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "doc_type",
+              "value": "={{ $('Validate and Parse LLM JSON').first().json.document_type }}",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "title",
+              "value": "={{ $('Validate and Parse LLM JSON').first().json.document_type }} - {{ $('Validate and Parse LLM JSON').first().json.patient_name }}",
+              "type": "string"
+            },
+            {
+              "id": "id-4",
+              "name": "file_url",
+              "value": "=https://drive.google.com/file/d/{{ $('Validate and Parse LLM JSON').first().json.file_id }}/view",
+              "type": "string"
+            },
+            {
+              "id": "id-5",
+              "name": "text_extract",
+              "value": "={{ $('Validate and Parse LLM JSON').first().json.ocr_text }}",
+              "type": "string"
+            },
+            {
+              "id": "id-6",
+              "name": "summary",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            },
+            {
+              "id": "id-7",
+              "name": "metadata",
+              "value": "={{ JSON.stringify($('Validate and Parse LLM JSON').first().json.metadata) }}",
+              "type": "object"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "96e2cf19-872f-4d7c-a993-512d3378e33b",
+      "name": "Prepare Document Insert Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        576,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://xhszdmayjbbuuomcbgux.supabase.co/rest/v1/medical_documents",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhoc3pkbWF5amJidXVvbWNiZ3V4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NDIzMzI0OSwiZXhwIjoyMDc5ODA5MjQ5fQ.TNTEUTIGyHi11OAgtmktiC3PcRBCROWz5iLZW3bzrDM"
+            },
+            {
+              "name": "Authorization",
+              "value": "=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhoc3pkbWF5amJidXVvbWNiZ3V4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NDIzMzI0OSwiZXhwIjoyMDc5ODA5MjQ5fQ.TNTEUTIGyHi11OAgtmktiC3PcRBCROWz5iLZW3bzrDM"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ \n  {\n    \"patient_id\": $json.patient_id,\n    \"doc_type\": $json.doc_type,\n    \"title\": $json.title,\n    \"file_url\": $json.file_url,\n    \"text_extract\": $json.text_extract,\n    \"summary\": $json.summary,\n    \"metadata\": $json.metadata\n  }\n}}",
+        "options": {}
+      },
+      "id": "db84e14a-236f-4474-a7d7-73d07edc5d00",
+      "name": "Insert Medical Document in Supabase",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        800,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://xhszdmayjbbuuomcbgux.supabase.co/rest/v1/audit_logs",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhoc3pkbWF5amJidXVvbWNiZ3V4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NDIzMzI0OSwiZXhwIjoyMDc5ODA5MjQ5fQ.TNTEUTIGyHi11OAgtmktiC3PcRBCROWz5iLZW3bzrDM"
+            },
+            {
+              "name": "Authorization",
+              "value": "=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhoc3pkbWF5amJidXVvbWNiZ3V4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NDIzMzI0OSwiZXhwIjoyMDc5ODA5MjQ5fQ.TNTEUTIGyHi11OAgtmktiC3PcRBCROWz5iLZW3bzrDM"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"action\": \"document_ingested\",\n  \"actor\": \"n8n_ocr_worker\",\n  \"details\": {\n    \"patient_id\": \"={{ $('Prepare Document Insert Data').first().json.patient_id }}\",\n    \"document_id\": \"={{ $json[0].id }}\",\n    \"file_name\": \"={{ $('Validate and Parse LLM JSON').first().json.original_file_name }}\"\n  }\n}",
+        "options": {}
+      },
+      "id": "80c9319f-95d6-42e4-8bf3-5283a6cf1299",
+      "name": "Insert Audit Log in Supabase",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1024,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "move",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Validate and Parse LLM JSON').first().json.file_id }}"
+        },
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "=1hObHQeDyrJZa9fWx04MQd0wBmXbPqJo9",
+          "mode": "id"
+        }
+      },
+      "id": "00bba92f-3511-4086-89fb-c9f06827f7a3",
+      "name": "Move File to Processed Folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1248,
+        0
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Mkx5aoXVrkAZIq1U",
+          "name": "Google Drive account project name team project25"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://xhszdmayjbbuuomcbgux.supabase.co/rest/v1/dead_letter_records",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhoc3pkbWF5amJidXVvbWNiZ3V4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NDIzMzI0OSwiZXhwIjoyMDc5ODA5MjQ5fQ.TNTEUTIGyHi11OAgtmktiC3PcRBCROWz5iLZW3bzrDM"
+            },
+            {
+              "name": "Authorization",
+              "value": "=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhoc3pkbWF5amJidXVvbWNiZ3V4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NDIzMzI0OSwiZXhwIjoyMDc5ODA5MjQ5fQ.TNTEUTIGyHi11OAgtmktiC3PcRBCROWz5iLZW3bzrDM"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"file_name\": \"{{ $('Watch Clinic_Records_Raw Folder').first().json.name }}\",\n  \"file_id\": \"{{ $('Watch Clinic_Records_Raw Folder').first().json.id }}\",\n  \"reason\": \"OCR processing failed\",\n  \"error_details\": \"{{ JSON.stringify($json).replace(/\\\"/g, '\\\\\\\"') }}\",\n  \"timestamp\": \"{{ $now.toISO() }}\"\n}\n",
+        "options": {}
+      },
+      "id": "517fa614-84e3-4952-a76e-5102e4554fc0",
+      "name": "Log OCR Failure to Dead Letter Queue",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -1024,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Workflow Configuration').first().json.supabaseUrl }}/rest/v1/dead_letter_records",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $('Workflow Configuration').first().json.supabaseServiceKey }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Workflow Configuration').first().json.supabaseServiceKey }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"file_name\": {{ JSON.stringify($json.original_file_name) }},\n  \"file_id\": {{ JSON.stringify($json.file_id) }},\n  \"reason\": \"Invalid JSON from LLM extraction\",\n  \"error_details\": {{ JSON.stringify(JSON.stringify($json)) }},\n  \"timestamp\": {{ JSON.stringify($now.toISO()) }}\n}",
+        "options": {}
+      },
+      "id": "7a70d85c-97ff-42d5-978d-78038420cab8",
+      "name": "Log Invalid JSON to Dead Letter Queue",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        0,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://xhszdmayjbbuuomcbgux.supabase.co/rest/v1/dead_letter_records",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhoc3pkbWF5amJidXVvbWNiZ3V4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NDIzMzI0OSwiZXhwIjoyMDc5ODA5MjQ5fQ.TNTEUTIGyHi11OAgtmktiC3PcRBCROWz5iLZW3bzrDM"
+            },
+            {
+              "name": "Authorization",
+              "value": "=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhoc3pkbWF5amJidXVvbWNiZ3V4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NDIzMzI0OSwiZXhwIjoyMDc5ODA5MjQ5fQ.TNTEUTIGyHi11OAgtmktiC3PcRBCROWz5iLZW3bzrDM"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"file_name\": \"{{ $('Watch Clinic_Records_Raw Folder').first().json.name }}\",\n  \"file_id\": \"{{ $('Watch Clinic_Records_Raw Folder').first().json.id }}\",\n  \"reason\": \"OCR processing failed\",\n  \"error_details\": \"{{ JSON.stringify($json).replace(/\\\"/g, '\\\\\\\"') }}\",\n  \"timestamp\": \"{{ $now.toISO() }}\"\n}\n",
+        "options": {}
+      },
+      "id": "f580571f-3336-4144-b89b-d4799a9e49bb",
+      "name": "Log Invalid File Type to Dead Letter Queue",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -1696,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ocr-upload",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -2368,
+        80
+      ],
+      "id": "285255c1-5f7d-4df2-a216-8781743c0357",
+      "name": "Webhook",
+      "webhookId": "c6939c56-b3c2-421d-99be-e93236cdb4a5"
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "file",
+        "name": "={{ $binary.file.fileName }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1yLs2GcD5hfqcZPfpDw9GulbT8IyL8bg0",
+          "mode": "list",
+          "cachedResultName": "Clinic_Records_Raw",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1yLs2GcD5hfqcZPfpDw9GulbT8IyL8bg0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -2160,
+        80
+      ],
+      "id": "7c06b382-a4c0-4b59-a4e9-4965951f59e8",
+      "name": "Upload file in to clinic_Reecord_Raw Folder",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Mkx5aoXVrkAZIq1U",
+          "name": "Google Drive account project name team project25"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "newteam25.app.n8n.cloud",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36",
+            "content-length": "113969",
+            "accept": "*/*",
+            "accept-encoding": "gzip, br",
+            "accept-language": "en-US,en;q=0.9",
+            "cdn-loop": "cloudflare; loops=1; subreqs=1",
+            "cf-connecting-ip": "39.37.55.241",
+            "cf-ew-via": "15",
+            "cf-ipcountry": "PK",
+            "cf-ray": "9abc908a97a1fd8f-SIN",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "cf-worker": "n8n.cloud",
+            "content-type": "multipart/form-data; boundary=----WebKitFormBoundaryAXmbCFzNTuQureMf",
+            "origin": "null",
+            "priority": "u=1, i",
+            "sec-ch-ua": "\"Chromium\";v=\"142\", \"Google Chrome\";v=\"142\", \"Not_A Brand\";v=\"99\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "cross-site",
+            "x-forwarded-for": "39.37.55.241, 172.70.208.124",
+            "x-forwarded-host": "newteam25.app.n8n.cloud",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "traefik-prod-users-gwc-80-5fc4f59987-f5hxw",
+            "x-is-trusted": "yes",
+            "x-real-ip": "39.37.55.241"
+          },
+          "params": {},
+          "query": {},
+          "body": {},
+          "webhookUrl": "https://newteam25.app.n8n.cloud/webhook/ocr-upload",
+          "executionMode": "production"
+        },
+        "binary": {
+          "file": {
+            "mimeType": "application/pdf",
+            "fileType": "pdf",
+            "fileExtension": "pdf",
+            "data": "filesystem-v2",
+            "fileName": "Doctor prescription-compressed.pdf",
+            "id": "filesystem-v2:workflows/mu0E8prdolxQxYWU/executions/temp/binary_data/d03a14c2-2435-4ce6-8eb4-434afb8dd5aa",
+            "fileSize": "114 kB"
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Watch Clinic_Records_Raw Folder": [
+      {
+        "json": {
+          "parents": [
+            "1yLs2GcD5hfqcZPfpDw9GulbT8IyL8bg0"
+          ],
+          "lastModifyingUser": {
+            "displayName": "Team 25",
+            "kind": "drive#user",
+            "me": true,
+            "permissionId": "02981017600896161882",
+            "emailAddress": "team.25n8n@gmail.com",
+            "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocIpfrqRctThcmMUkI6EzvIJ4rMU6cToLZdYozThnvcU9bpiSA=s64"
+          },
+          "owners": [
+            {
+              "displayName": "Team 25",
+              "kind": "drive#user",
+              "me": true,
+              "permissionId": "02981017600896161882",
+              "emailAddress": "team.25n8n@gmail.com",
+              "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocIpfrqRctThcmMUkI6EzvIJ4rMU6cToLZdYozThnvcU9bpiSA=s64"
+            }
+          ],
+          "permissions": [
+            {
+              "kind": "drive#permission",
+              "id": "02981017600896161882",
+              "type": "user",
+              "emailAddress": "team.25n8n@gmail.com",
+              "role": "owner",
+              "displayName": "Team 25",
+              "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocIpfrqRctThcmMUkI6EzvIJ4rMU6cToLZdYozThnvcU9bpiSA=s64",
+              "deleted": false,
+              "pendingOwner": false
+            }
+          ],
+          "spaces": [
+            "drive"
+          ],
+          "capabilities": {
+            "canAcceptOwnership": false,
+            "canAddChildren": false,
+            "canAddMyDriveParent": false,
+            "canChangeCopyRequiresWriterPermission": true,
+            "canChangeItemDownloadRestriction": true,
+            "canChangeSecurityUpdateEnabled": false,
+            "canChangeViewersCanCopyContent": true,
+            "canComment": true,
+            "canCopy": true,
+            "canDelete": true,
+            "canDisableInheritedPermissions": false,
+            "canDownload": true,
+            "canEdit": true,
+            "canEnableInheritedPermissions": true,
+            "canListChildren": false,
+            "canModifyContent": true,
+            "canModifyContentRestriction": true,
+            "canModifyEditorContentRestriction": true,
+            "canModifyOwnerContentRestriction": true,
+            "canModifyLabels": false,
+            "canMoveChildrenWithinDrive": false,
+            "canMoveItemIntoTeamDrive": true,
+            "canMoveItemOutOfDrive": true,
+            "canMoveItemWithinDrive": true,
+            "canReadLabels": false,
+            "canReadRevisions": true,
+            "canRemoveChildren": false,
+            "canRemoveContentRestriction": false,
+            "canRemoveMyDriveParent": true,
+            "canRename": true,
+            "canShare": true,
+            "canTrash": true,
+            "canUntrash": true
+          },
+          "permissionIds": [
+            "02981017600896161882"
+          ],
+          "linkShareMetadata": {
+            "securityUpdateEligible": false,
+            "securityUpdateEnabled": true
+          },
+          "downloadRestrictions": {
+            "itemDownloadRestriction": {
+              "restrictedForReaders": false,
+              "restrictedForWriters": false
+            },
+            "effectiveDownloadRestrictionWithContext": {
+              "restrictedForReaders": false,
+              "restrictedForWriters": false
+            }
+          },
+          "kind": "drive#file",
+          "id": "1ulHO8JA6lMsGR1wmVNFNcPwVQ3Tf60xg",
+          "name": "Doctor prescription-compressed.pdf",
+          "mimeType": "application/pdf",
+          "starred": false,
+          "trashed": false,
+          "explicitlyTrashed": false,
+          "version": "4",
+          "webContentLink": "https://drive.google.com/uc?id=1ulHO8JA6lMsGR1wmVNFNcPwVQ3Tf60xg&export=download",
+          "webViewLink": "https://drive.google.com/file/d/1ulHO8JA6lMsGR1wmVNFNcPwVQ3Tf60xg/view?usp=drivesdk",
+          "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/application/pdf",
+          "hasThumbnail": true,
+          "thumbnailLink": "https://lh3.googleusercontent.com/drive-storage/AJQWtBMbJmui-Z7PO4xCiAqILwiatw6JLALNxUPS1dPyOarcLV8VLDbQqfdKDu2141yPbofi5c8xvOzfxPC_bA5UT4qiJICBdTGghSlFf7O5gzYK_DA=s220",
+          "thumbnailVersion": "1",
+          "viewedByMe": false,
+          "createdTime": "2025-12-10T12:24:06.820Z",
+          "modifiedTime": "2025-12-10T12:24:07.705Z",
+          "modifiedByMeTime": "2025-12-10T12:24:07.705Z",
+          "modifiedByMe": true,
+          "shared": false,
+          "ownedByMe": true,
+          "viewersCanCopyContent": true,
+          "copyRequiresWriterPermission": false,
+          "writersCanShare": true,
+          "originalFilename": "Doctor prescription-compressed.pdf",
+          "fullFileExtension": "pdf",
+          "fileExtension": "pdf",
+          "md5Checksum": "e6ba12223ae68d6770d15c8990df1083",
+          "sha1Checksum": "a36277d3dc565b3472894d0129e171c3555fee43",
+          "sha256Checksum": "238556ac3b0f151fda34eed925e6da01778893973b41e52c33176a0ea734e054",
+          "size": "113756",
+          "quotaBytesUsed": "113756",
+          "headRevisionId": "0B5TwhyMU5QfLcXV3cWhqakN1eXA3TmU4VjlKV3NLaDFFcEhrPQ",
+          "isAppAuthorized": true,
+          "inheritedPermissionsDisabled": false
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Watch Clinic_Records_Raw Folder": {
+      "main": [
+        [
+          {
+            "node": "Workflow Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Configuration": {
+      "main": [
+        [
+          {
+            "node": "Check File Type (PDF or Image)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check File Type (PDF or Image)": {
+      "main": [
+        [
+          {
+            "node": "Download File Binary",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Invalid File Type to Dead Letter Queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download File Binary": {
+      "main": [
+        [
+          {
+            "node": "OCR API Call (OCR.Space)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OCR API Call (OCR.Space)": {
+      "main": [
+        [
+          {
+            "node": "Check OCR Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check OCR Success": {
+      "main": [
+        [
+          {
+            "node": "Clean OCR Text",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log OCR Failure to Dead Letter Queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean OCR Text": {
+      "main": [
+        [
+          {
+            "node": "Extract Medical Metadata with LLM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini 1.5 Pro Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Extract Medical Metadata with LLM",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Generate Document Summary",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Medical Record JSON Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Extract Medical Metadata with LLM",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Medical Metadata with LLM": {
+      "main": [
+        [
+          {
+            "node": "Validate and Parse LLM JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate and Parse LLM JSON": {
+      "main": [
+        [
+          {
+            "node": "Check JSON Valid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check JSON Valid": {
+      "main": [
+        [
+          {
+            "node": "Upsert Patient in Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Invalid JSON to Dead Letter Queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert Patient in Supabase": {
+      "main": [
+        [
+          {
+            "node": "Generate Document Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Document Summary": {
+      "main": [
+        [
+          {
+            "node": "Prepare Document Insert Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Document Insert Data": {
+      "main": [
+        [
+          {
+            "node": "Insert Medical Document in Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Medical Document in Supabase": {
+      "main": [
+        [
+          {
+            "node": "Insert Audit Log in Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Audit Log in Supabase": {
+      "main": [
+        [
+          {
+            "node": "Move File to Processed Folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Upload file in to clinic_Reecord_Raw Folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "085fb19a-c4da-46c6-a0bd-762ca415b0b7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d6d568813a88aea710aa5796ea28840c458ade99e5fe88b00dc7056afbfca8d0"
+  },
+  "id": "mu0E8prdolxQxYWU",
+  "tags": []
+}
