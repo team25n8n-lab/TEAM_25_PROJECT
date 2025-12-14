@@ -28,7 +28,7 @@ This repository documents the complete architecture, API usage, workflow logic, 
 8. [Node-Level Documentation](#-node-level-documentation)
 9. [Setup Instructions](#-setup-instructions)
 10. [Deployment Guide](#-deployment-guide)
-11. [Scalability & Limitations](#-scalability)
+11. [Scalability](#-scalability)
 12. [Future Improvements](#-future-improvements)
 
 ---
