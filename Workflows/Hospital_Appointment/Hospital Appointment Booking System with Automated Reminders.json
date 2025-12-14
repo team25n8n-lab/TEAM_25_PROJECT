@@ -1,0 +1,824 @@
+{
+  "name": "Hospital Appointment Booking System with Automated Reminders",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "confirm-appointment",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "a312e78d-f8ed-41b8-95e0-ce54517211c0",
+      "name": "Webhook - Confirm Appointment",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1952,
+        416
+      ],
+      "webhookId": "53918e0a-2357-4af0-b393-703bf7ebfc51"
+    },
+    {
+      "parameters": {
+        "tableId": "appointments",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "patient_name",
+              "fieldValue": "={{ $json.body.patient_name }}"
+            },
+            {
+              "fieldId": "phone",
+              "fieldValue": "={{ $json.body.phone }}"
+            },
+            {
+              "fieldId": "doctor_id",
+              "fieldValue": "={{ $json.body.doctor_id }}"
+            },
+            {
+              "fieldId": "date",
+              "fieldValue": "={{ $json.body.date }}"
+            },
+            {
+              "fieldId": "appointment_time",
+              "fieldValue": "={{ $json.body.appointment_time }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "=Confirmed"
+            },
+            {
+              "fieldId": "created_at",
+              "fieldValue": "={{ $now }}"
+            },
+            {
+              "fieldId": "day_of_week",
+              "fieldValue": "={{ new Date($json.body.date).toLocaleString('en-US', { weekday: 'long' }) }}"
+            }
+          ]
+        }
+      },
+      "id": "76d1c64f-ae72-4f9a-aef8-53d396791b0a",
+      "name": "Insert Appointment",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -1728,
+        416
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "upC1Iy4Y3nQa2gQX",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "doctors",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "keyValue": "={{ $('Insert Appointment').item.json.doctor_id }}"
+            }
+          ]
+        }
+      },
+      "id": "f39765ad-4e4a-47fb-992b-55dc3e99f6ee",
+      "name": "Get Doctor Details",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -1504,
+        416
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "upC1Iy4Y3nQa2gQX",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"status\": \"confirmed\",\n  \"appointment_id\": {{ $('Insert Appointment').item.json.id }},\n  \"message\": \"Appointment confirmed successfully\"\n}",
+        "options": {}
+      },
+      "id": "91565ea8-876c-40f5-ae2f-491ef4d0096f",
+      "name": "Return Confirmation",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -1056,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "resume": "specificTime",
+        "dateTime": "={{$json[\"waitUntil24h\"]}}"
+      },
+      "id": "e740fb01-5780-4946-992b-32d0fe8d88f4",
+      "name": "Wait 24h Before Appointment",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -832,
+        416
+      ],
+      "webhookId": "94f329b2-5477-46e2-8171-0f0b0abeaf2b",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "resume": "specificTime",
+        "dateTime": "={{$json[\"waitUntil2h\"]}}"
+      },
+      "id": "2e87773a-5f5e-4689-b2cf-14468a74595f",
+      "name": "Wait 2h Before Appointment",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -832,
+        608
+      ],
+      "webhookId": "cb77f35e-8d58-4ab0-bb4a-43d17ffda10d"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "supabaseUrl",
+              "value": "<__PLACEHOLDER_VALUE__Supabase Project URL__>",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "messagingApiUrl",
+              "value": "<__PLACEHOLDER_VALUE__SMS/WhatsApp API Endpoint__>",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "4b05b3c3-ebc3-496d-af20-a47f6e068ecf",
+      "name": "Workflow Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1728,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "doctors",
+        "returnAll": true,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.body.doctor_id }}"
+            }
+          ]
+        }
+      },
+      "id": "e1ed1ceb-1dce-43e7-b15a-9d914a0bde45",
+      "name": "Get Doctors by Specialty",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -1504,
+        0
+      ],
+      "alwaysOutputData": false,
+      "credentials": {
+        "supabaseApi": {
+          "id": "upC1Iy4Y3nQa2gQX",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "doctor_schedules",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "doctor_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.id }}"
+            },
+            {
+              "keyName": "date",
+              "condition": "eq",
+              "keyValue": "={{ $('Webhook - Request Appointment1').item.json.body.date }}"
+            }
+          ]
+        }
+      },
+      "id": "f4936c05-b824-4ffd-b260-1f5288a10653",
+      "name": "Get Doctor Schedules",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -1280,
+        0
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "upC1Iy4Y3nQa2gQX",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "appointments",
+        "returnAll": true,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "status",
+              "condition": "eq",
+              "keyValue": "Confirmed"
+            }
+          ]
+        }
+      },
+      "id": "1593ddcf-a3e5-4395-b5df-4547a63ea72f",
+      "name": "Get Existing Appointments",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -832,
+        0
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "upC1Iy4Y3nQa2gQX",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pull data\nconst doctors = $(\"Get Doctors by Specialty\").all().map(item => item.json);\nconst schedules = $(\"Get Doctor Schedules\").all().map(item => item.json);\nconst existingAppointments = $(\"Get Existing Appointments\").all().map(item => item.json);\n\n// Convert \"09:00 - 09:30\" → numeric minutes\nfunction parseSlotRange(slotStr) {\n  const [start, end] = slotStr.split(\" - \");\n  return {\n    start: timeToMinutes(start),\n    end: timeToMinutes(end)\n  };\n}\n\nfunction timeToMinutes(timeStr) {\n  const [hours, minutes] = timeStr.split(':').map(Number);\n  return hours * 60 + minutes;\n}\n\nfunction minutesToTime(minutes) {\n  const hours = Math.floor(minutes / 60);\n  const mins = minutes % 60;\n  return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;\n}\n\nconst availableSlots = [];\nconst slotDuration = 30;\n\nfor (const schedule of schedules) {\n  const doctorId = schedule.doctor_id;\n  const doctor = doctors.find(d => d.id === doctorId);\n  if (!doctor) continue;\n\n  const startTime = timeToMinutes(schedule.start_time);\n  const endTime = timeToMinutes(schedule.end_time);\n  const dayOfWeek = schedule.day_of_week;\n\n  // 📌 Filter only CONFIRMED bookings for this doctor/date\n  const doctorAppointments = existingAppointments.filter(\n    apt => apt.doctor_id === doctorId && apt.date === schedule.date && apt.status === \"Confirmed\"\n  );\n\n  // Convert existing confirmed slots into ranges\n  const bookedRanges = doctorAppointments.map(a => parseSlotRange(a.appointment_time));\n\n  for (let time = startTime; time < endTime; time += slotDuration) {\n    const slotStart = time;\n    const slotEnd = time + slotDuration;\n\n    // ❗ Check conflict against parsed slot ranges\n    const hasConflict = bookedRanges.some(range =>\n      (slotStart >= range.start && slotStart < range.end) ||\n      (slotEnd > range.start && slotStart < range.start)\n    );\n\n    if (!hasConflict) {\n      availableSlots.push({\n        doctor_id: doctorId,\n        doctor_name: doctor.name,\n        specialty: doctor.specialty,\n        day_of_week: dayOfWeek,\n        start_time: minutesToTime(slotStart),\n        end_time: minutesToTime(slotEnd),\n        date: schedule.date\n      });\n    }\n  }\n}\n\nreturn [{ json: { availableSlots, totalSlots: availableSlots.length } }];\n"
+      },
+      "id": "4f4e2be7-0169-4faa-ae60-cb8853b77f30",
+      "name": "Calculate Available Slots",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -608,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "id-1",
+              "leftValue": "={{ $json.availableSlots.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "3d576884-2be0-4bc2-a0a3-69966987173f",
+      "name": "Check Availability",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -384,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"status\": \"no_availability\",\n  \"message\": \"No available slots.\"\n}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "2c92b77b-eb32-4b77-90ed-ce6184beb46e",
+      "name": "Return No Availability",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        64,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "request-appointments",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "e52bb120-5590-47d2-8630-5c483e72de6a",
+      "name": "Webhook - Request Appointment1",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1952,
+        0
+      ],
+      "webhookId": "e681c4d7-52fe-416a-9cb7-fe29391240a8"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      status: \"no_availability\",\n      message: \"No available slots.\"\n    },\n  },\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -160,
+        96
+      ],
+      "id": "e036d7ac-11f1-42b6-9f7e-5b34cd19d545",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      status: \"success\",\n      total_slots: $json.availableSlots.length,\n      available_slots: $json.availableSlots,\n    },\n  },\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -160,
+        -96
+      ],
+      "id": "0ac8166c-b421-446b-88db-ad8a7c32c3b9",
+      "name": "Data clean"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"status\": \"success\",\n  \"total_slots\": {{ $json.total_slots }},\n  \"available_slots\": {{ JSON.stringify($json.available_slots) }}\n}\n",
+        "options": {}
+      },
+      "id": "a6d3a550-64e2-4fd5-9a6c-75afabd1a334",
+      "name": "Return Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        64,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4de5c19f-a9fc-4ce3-b767-076c4ff5e3ed",
+              "leftValue": "={{ $('Get Doctor Schedules').all().length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1056,
+        0
+      ],
+      "id": "f720fa9c-d42d-4e14-879d-38deeda6b066",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Access the previous node's data\nconst appointment = $items(\"Insert Appointment\")[0].json;\n\nif (!appointment.date || !appointment.appointment_time) {\n  throw new Error(\"Appointment date or time is missing!\");\n}\n\nconst startTime = appointment.appointment_time.split(' - ')[0];\nconst appointmentDateTime = new Date(`${appointment.date}T${startTime}:00Z`);\n\n// Calculate 24h and 2h before\nconst wait24h = new Date(appointmentDateTime.getTime() - 24 * 60 * 60 * 1000);\nconst wait2h = new Date(appointmentDateTime.getTime() - 2 * 60 * 60 * 1000);\n\nreturn [\n  {\n    json: {\n      ...appointment,\n      waitUntil24h: wait24h.toISOString(),\n      waitUntil2h: wait2h.toISOString()\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1056,
+        512
+      ],
+      "id": "08bb3e7c-295e-4a77-9276-21b0ee79a34b",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Webhook - Confirm Appointment').item.json.body.email }}",
+        "subject": "Appointment Book",
+        "message": "=<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"UTF-8\">\n<style>\n  body {\n    font-family: Arial, sans-serif;\n    background-color: #f4f7fb;\n    margin: 0;\n    padding: 0;\n  }\n  .container {\n    max-width: 600px;\n    margin: 25px auto;\n    background: #ffffff;\n    border-radius: 12px;\n    box-shadow: 0 4px 15px rgba(0,0,0,0.08);\n    overflow: hidden;\n  }\n  .header {\n    background: linear-gradient(135deg, #28c76f, #20a95d);\n    padding: 25px;\n    color: #fff;\n    text-align: center;\n  }\n  .header h1 {\n    margin: 0;\n    font-size: 22px;\n    letter-spacing: 0.5px;\n  }\n  .body {\n    padding: 25px;\n    color: #333;\n    line-height: 1.7;\n  }\n  .details {\n    background: #e8fff2;\n    padding: 15px;\n    border-radius: 10px;\n    margin-top: 15px;\n  }\n  .details p {\n    margin: 8px 0;\n    font-size: 15px;\n  }\n  .footer {\n    text-align: center;\n    font-size: 12px;\n    color: #666;\n    padding: 20px;\n  }\n</style>\n</head>\n\n<body>\n<div class=\"container\">\n\n  <div class=\"header\">\n    <h1>2-Hour Final Reminder</h1>\n  </div>\n\n  <div class=\"body\">\n    <p>Hello,</p>\n    <p>This is your final reminder—your appointment is in 2 hours.</p>\n\n    <div class=\"details\">\n      <p><strong>Doctor:</strong> {{ $('Get Doctor Details').item.json.name }}</p>\n      <p><strong>Time:</strong> {{ $('Insert Appointment').item.json.appointment_time }}</p>\n      <p><strong>Date:</strong> {{ $('Insert Appointment').item.json.date }}</p>\n    </div>\n\n    <p>We look forward to seeing you soon.</p>\n  </div>\n\n  <div class=\"footer\">\n    © 2025 SmartCare Hospital — Appointment Reminder\n  </div>\n\n</div>\n</body>\n</html>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -608,
+        608
+      ],
+      "id": "af7ef418-3997-42dd-bb67-d2a28fa223ef",
+      "name": "Alert 2hr before",
+      "webhookId": "72dd5fa5-0867-4bfa-9539-c52db8917563",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "jhqSTdUguQruXeFP",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Webhook - Confirm Appointment').item.json.body.email }}",
+        "subject": "Appointment Book",
+        "message": "=<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"UTF-8\">\n<style>\n  body {\n    font-family: Arial, sans-serif;\n    background-color: #f4f7fb;\n    margin: 0;\n    padding: 0;\n  }\n  .container {\n    max-width: 600px;\n    margin: 25px auto;\n    background: #ffffff;\n    border-radius: 12px;\n    box-shadow: 0 4px 15px rgba(0,0,0,0.08);\n    overflow: hidden;\n  }\n  .header {\n    background: linear-gradient(135deg, #ff9f43, #ff6f3c);\n    padding: 25px;\n    color: #fff;\n    text-align: center;\n  }\n  .header h1 {\n    margin: 0;\n    font-size: 22px;\n    letter-spacing: 0.5px;\n  }\n  .body {\n    padding: 25px;\n    color: #333;\n    line-height: 1.7;\n  }\n  .details {\n    background: #fff5e6;\n    padding: 15px;\n    border-radius: 10px;\n    margin-top: 15px;\n  }\n  .details p {\n    margin: 8px 0;\n    font-size: 15px;\n  }\n  .footer {\n    text-align: center;\n    font-size: 12px;\n    color: #666;\n    padding: 20px;\n  }\n</style>\n</head>\n\n<body>\n<div class=\"container\">\n\n  <div class=\"header\">\n    <h1>24-Hour Appointment Reminder</h1>\n  </div>\n\n  <div class=\"body\">\n    <p>Hello,</p>\n    <p>This is a friendly reminder that you have an appointment tomorrow.</p>\n\n    <div class=\"details\">\n      <p><strong>Doctor:</strong> {{ $('Get Doctor Details').item.json.name }}</p>\n      <p><strong>Date:</strong> {{ $('Insert Appointment').item.json.date }}</p>\n      <p><strong>Time:</strong> {{ $('Insert Appointment').item.json.appointment_time }}</p>\n    </div>\n\n    <p>Please arrive at least 10 minutes early for your appointment.</p>\n  </div>\n\n  <div class=\"footer\">\n    © 2025 SmartCare Hospital — Appointment Reminder\n  </div>\n\n</div>\n</body>\n</html>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -608,
+        416
+      ],
+      "id": "5355208f-0453-4b21-8521-77dd20c33ece",
+      "name": "Reminder 24hr before",
+      "webhookId": "72dd5fa5-0867-4bfa-9539-c52db8917563",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "jhqSTdUguQruXeFP",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Webhook - Confirm Appointment').item.json.body.email }}",
+        "subject": "Appointment Book",
+        "message": "=<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"UTF-8\">\n<style>\n  body {\n    font-family: Arial, sans-serif;\n    background-color: #f4f7fb;\n    margin: 0;\n    padding: 0;\n  }\n  .container {\n    max-width: 600px;\n    margin: 25px auto;\n    background: #ffffff;\n    border-radius: 12px;\n    box-shadow: 0 4px 15px rgba(0,0,0,0.08);\n    overflow: hidden;\n  }\n  .header {\n    background: linear-gradient(135deg, #0b69ff, #4da3ff);\n    padding: 25px;\n    color: #fff;\n    text-align: center;\n  }\n  .header h1 {\n    margin: 0;\n    font-size: 22px;\n    letter-spacing: 0.5px;\n  }\n  .body {\n    padding: 25px;\n    color: #333;\n    line-height: 1.7;\n  }\n  .details {\n    background: #f0f6ff;\n    padding: 15px;\n    border-radius: 10px;\n    margin-top: 15px;\n  }\n  .details p {\n    margin: 8px 0;\n    font-size: 15px;\n  }\n  .footer {\n    text-align: center;\n    font-size: 12px;\n    color: #666;\n    padding: 20px;\n  }\n</style>\n</head>\n\n<body>\n<div class=\"container\">\n\n  <div class=\"header\">\n    <h1>Appointment Confirmed</h1>\n  </div>\n\n  <div class=\"body\">\n    <p>Hello,</p>\n    <p>Your appointment has been successfully booked. Below are your appointment details:</p>\n\n    <div class=\"details\">\n      <p><strong>Doctor:</strong> {{ $('Get Doctor Details').item.json.name }}</p>\n      <p><strong>Date:</strong> {{ $('Insert Appointment').item.json.date }}</p>\n      <p><strong>Time:</strong> {{ $('Insert Appointment').item.json.appointment_time }}</p>\n      <p><strong>Status:</strong> {{ $('Insert Appointment').item.json.status }}</p>\n    </div>\n\n    <p>Please arrive at least 10 minutes before your scheduled time.  \n    If you need to reschedule, contact us through our support team.</p>\n  </div>\n\n  <div class=\"footer\">\n    © 2025 SmartCare Hospital — Appointment System\n  </div>\n\n</div>\n</body>\n</html>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -1280,
+        416
+      ],
+      "id": "91ccd0f1-bd53-419b-be8e-f19b88996e2d",
+      "name": "Send Confirmation",
+      "webhookId": "72dd5fa5-0867-4bfa-9539-c52db8917563",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "jhqSTdUguQruXeFP",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Webhook - Confirm Appointment": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8n.nabeeljaan.site",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0",
+            "content-length": "173",
+            "accept": "*/*",
+            "accept-encoding": "gzip, br",
+            "accept-language": "en-US,en;q=0.9",
+            "cdn-loop": "cloudflare; loops=1",
+            "cf-connecting-ip": "2001:16a2:c390:1ff0:fd09:afc6:170f:400f",
+            "cf-ipcountry": "SA",
+            "cf-ray": "9abffc9f8c54eea9-MXP",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "content-type": "application/json",
+            "origin": "null",
+            "priority": "u=1, i",
+            "sec-ch-ua": "\"Microsoft Edge\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "cross-site",
+            "x-forwarded-for": "172.69.68.24",
+            "x-forwarded-host": "n8n.nabeeljaan.site",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "c297be6d529c",
+            "x-real-ip": "172.69.68.24"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "patient_name": "jaank",
+            "email": "nabeeljaan1313@outlook.com",
+            "phone": "032656565544",
+            "doctor": "Dr. Noor",
+            "doctor_id": 5,
+            "date": "2025-12-11",
+            "appointment_time": "12:30 - 13:00"
+          },
+          "webhookUrl": "https://n8n.nabeeljaan.site/webhook/confirm-appointment",
+          "executionMode": "production"
+        }
+      }
+    ],
+    "Webhook - Request Appointment1": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8n.nabeeljaan.site",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0",
+            "content-length": "35",
+            "accept": "*/*",
+            "accept-encoding": "gzip, br",
+            "accept-language": "en-US,en;q=0.9",
+            "cdn-loop": "cloudflare; loops=1",
+            "cf-connecting-ip": "2001:16a2:c174:53e7:847d:7ab6:5450:61a2",
+            "cf-ipcountry": "SA",
+            "cf-ray": "9ab88d74dc964bf0-MXP",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "content-type": "application/json",
+            "origin": "null",
+            "priority": "u=1, i",
+            "sec-ch-ua": "\"Microsoft Edge\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "cross-site",
+            "x-forwarded-for": "188.114.102.193",
+            "x-forwarded-host": "n8n.nabeeljaan.site",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "c297be6d529c",
+            "x-real-ip": "188.114.102.193"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "doctor_id": 1,
+            "date": "2025-12-16"
+          },
+          "webhookUrl": "https://n8n.nabeeljaan.site/webhook/request-appointments",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook - Confirm Appointment": {
+      "main": [
+        [
+          {
+            "node": "Insert Appointment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Appointment": {
+      "main": [
+        [
+          {
+            "node": "Get Doctor Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Doctor Details": {
+      "main": [
+        [
+          {
+            "node": "Send Confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 24h Before Appointment": {
+      "main": [
+        [
+          {
+            "node": "Reminder 24hr before",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 2h Before Appointment": {
+      "main": [
+        [
+          {
+            "node": "Alert 2hr before",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Configuration": {
+      "main": [
+        [
+          {
+            "node": "Get Doctors by Specialty",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Doctors by Specialty": {
+      "main": [
+        [
+          {
+            "node": "Get Doctor Schedules",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Doctor Schedules": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Existing Appointments": {
+      "main": [
+        [
+          {
+            "node": "Calculate Available Slots",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Available Slots": {
+      "main": [
+        [
+          {
+            "node": "Check Availability",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Availability": {
+      "main": [
+        [
+          {
+            "node": "Data clean",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - Request Appointment1": {
+      "main": [
+        [
+          {
+            "node": "Workflow Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Return No Availability",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data clean": {
+      "main": [
+        [
+          {
+            "node": "Return Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Get Existing Appointments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Wait 24h Before Appointment",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Wait 2h Before Appointment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Confirmation": {
+      "main": [
+        [
+          {
+            "node": "Return Confirmation",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2f4eb110-21f3-4dfb-a335-553a5a0fddc3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d6d568813a88aea710aa5796ea28840c458ade99e5fe88b00dc7056afbfca8d0"
+  },
+  "id": "5Mqo8uTNw6C8M4FR",
+  "tags": []
+}
