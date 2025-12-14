@@ -1,0 +1,800 @@
+{
+  "name": "Pharmacy Inventory Management and Expiry Alerts",
+  "nodes": [
+    {
+      "parameters": {
+        "fieldToSplitOut": "medicines",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -1120,
+        304
+      ],
+      "id": "437d55e0-406c-46e5-9488-16ea561b8c9b",
+      "name": "Split Medicines Into Items"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2b9491ab-4144-45dc-a3c2-a9614f53cd0b",
+              "leftValue": "={{ $json['Stock Needed?'] }}",
+              "rightValue": "YES",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -896,
+        96
+      ],
+      "id": "a660b1d7-9280-45bf-84e5-428841d82384",
+      "name": "Check Stock Needed or Not"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8db83cc5-59e9-4b22-93da-bbae9d99caf5",
+              "name": "alertType",
+              "value": "Low Stock Alert",
+              "type": "string"
+            },
+            {
+              "id": "6a70f480-3013-4b2b-9928-902bcc82b2a5",
+              "name": "alertMessage",
+              "value": "=🚨 LOW STOCK ALERT  \n\nMedicine: {{ $json.Medicines }} \nCurrent Stock: {{ $json['Current Stock'] }} \nMinimum Threshold: {{ $json.Threshold }} \nRecommended Restock Quantity:  {{  $json.Threshold  - $json['Current Stock'] + 50 }}",
+              "type": "string"
+            },
+            {
+              "id": "128b5070-1358-4dab-9749-fe6e0d9b6f1f",
+              "name": "recommendedRestock",
+              "value": "={{ $json.Threshold  -  $json['Current Stock']  + 50 }}",
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -672,
+        96
+      ],
+      "id": "40b79c70-9a27-4449-af4f-d2d7bcb85a8d",
+      "name": "Format Low Stock Alert"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        80,
+        224
+      ],
+      "id": "9b11fc1a-18ff-470d-a863-e9c18fb14fdb",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "jTywaPAPNBFR9V7Y",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "23186f15-b8b4-49c9-be45-11e6156bf892",
+              "name": "alertType",
+              "value": "Expiry Warning",
+              "type": "string"
+            },
+            {
+              "id": "7cc57c7f-ebef-441b-8507-bb17369b8595",
+              "name": "alertMessage",
+              "value": "=🚨 EXPIRY WARNING \n\nMedicine: {{ $json.Medicines }} \nExpiry Date: {{ $json.Expiry }} \nDays Until Expiry: {{ $json['Days Until Expiry'] }}\nCurrent Stock: {{ $json['Current Stock'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -672,
+        496
+      ],
+      "id": "5e0968c0-bbf6-4c00-a04b-df91abbef402",
+      "name": "Format Expiry Alert"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        80,
+        720
+      ],
+      "id": "71a45f24-1597-4737-a1e2-c64e9883a6e0",
+      "name": "OpenAI Chat Model3",
+      "credentials": {
+        "openAiApi": {
+          "id": "jTywaPAPNBFR9V7Y",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input: items coming from your spreadsheet/Google Sheets/Airtable/etc.\n// Each item contains medicine row data.\n\n// Output: ONE item only, containing:\n// { medicines: [ {...}, {...}, ... ] }\n\nconst input = items.map(i => i.json);\n\n// Wrap all rows inside ONE array with key \"medicines\"\nreturn [\n  {\n    json: {\n      medicines: input\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1344,
+        304
+      ],
+      "id": "410e5d6f-efe4-4afc-8b5d-57a8f9b92511",
+      "name": "Formatting Medicines"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1cZAQ8Dz7gwQ70u6cUhrzZnV6mDbu2UUHke9Uir_-hQY",
+          "mode": "list",
+          "cachedResultName": "Sales",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cZAQ8Dz7gwQ70u6cUhrzZnV6mDbu2UUHke9Uir_-hQY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sales",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cZAQ8Dz7gwQ70u6cUhrzZnV6mDbu2UUHke9Uir_-hQY/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1568,
+        304
+      ],
+      "id": "49054457-3a61-465e-b596-6b2cb1d1171f",
+      "name": "Medicines Data",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "BJIgFLim9RfSKthg",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c110ba77-f77c-49dc-87a8-8f4830c22291",
+              "leftValue": "={{ $json['Days Until Expiry'] }}",
+              "rightValue": 30,
+              "operator": {
+                "type": "number",
+                "operation": "lte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -896,
+        496
+      ],
+      "id": "39378de9-d0d5-4802-ae55-861051377fcf",
+      "name": "Check Medicine is Expired or Not"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the outer output string\nconst outer = $json[\"output\"];\n\n// Parse the inner JSON string\nconst parsed = JSON.parse(outer);\n\n// Extract the final output text\nconst finalOutput = parsed[0].output;\n\n// Return it as the node's output\nreturn [\n  {\n    json: {\n      output: finalOutput\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        368,
+        0
+      ],
+      "id": "4b681504-27c9-4e1d-9fe9-0b264ecc0dc1",
+      "name": "Formatting Telegram Message Body"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input: items[0].json.data (array of medicines)\n\nconst medicines = items[0].json.data;\n\n// Extract all alertMessage values and combine into a single array\nconst combinedAlerts = medicines.map(m => m.alertMessage);\n\n// Output format for n8n\nreturn [\n  {\n    json: {\n      alertMessages: combinedAlerts\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        96
+      ],
+      "id": "93fce722-a2c6-4dc2-a6aa-4e9148b07b9c",
+      "name": "Formatting Low Stock Alerts"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -448,
+        96
+      ],
+      "id": "3bbeb22c-1027-4dc1-b76d-eaff88d54745",
+      "name": "Combining Low Stock Alerts"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -448,
+        496
+      ],
+      "id": "41de112a-53af-4217-957c-9f76fa2a94de",
+      "name": "Combining Expiry Alerts"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input: items[0].json.data (array of medicines)\n\nconst medicines = items[0].json.data;\n\n// Extract all alertMessage values and combine into a single array\nconst combinedAlerts = medicines.map(m => m.alertMessage);\n\n// Output format for n8n\nreturn [\n  {\n    json: {\n      alertMessages: combinedAlerts\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        496
+      ],
+      "id": "d17ba624-9da2-4401-a68b-5b1523b29cf9",
+      "name": "Formatting Expiry Alerts"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Here is your input: {{ $json.alertMessages }}",
+        "options": {
+          "systemMessage": "You create a Telegram-friendly plain-text digest inside a single JSON response.\n\nYour task is to read and interpret the alertMessages array from the input JSON.\nEach item in this array represents one medicine alert.\n\nExtraction Rules\n\nFor each alert message, extract ONLY:\n\nMedicine\n\nExpiry Date\n\nDays Until Expiry\n\nCurrent Stock\n\nUse only the values found within each alert message.\nDo NOT guess, modify, or invent values.\nDo NOT copy raw alert text.\n\n Negative \"Days Until Expiry\" Processing (VERY IMPORTANT)\n\nIf Days Until Expiry < 0, you MUST:\n\nConvert the negative value to a positive number\n\nOutput it in the following exact format:\n\nDays Until Expiry: X days past the expiry\n\n\nWhere X is the positive value.\n\nDo NOT show the negative number\n\nDo NOT add any extra formatting, symbols, or text\n\nMandatory Example\n\nIf Days Until Expiry = -13, you must output:\n\nDays Until Expiry: 13 days past the expiry\n\n\n(Exactly this wording, lowercase “days past the expiry”)\n\n Output Format (EXTREMELY STRICT)\n\nYour output MUST follow this exact layout:\n\nEXPIRY WARNING\n\nMedicine: NAME_HERE\nExpiry Date: DATE_HERE\nDays Until Expiry: VALUE_HERE\nCurrent Stock: NUMBER_HERE\n\nMedicine: NAME_HERE\nExpiry Date: DATE_HERE\nDays Until Expiry: VALUE_HERE\nCurrent Stock: NUMBER_HERE\n\n... continue for all medicines ...\n\nPLEASE REVIEW AND TAKE ACTION!\n\nNEW RULE (MANDATORY)\n\nAdd ONE blank line between each medicine block.\n\nA “medicine block” means the 4-line section:\n\nMedicine: ...\nExpiry Date: ...\nDays Until Expiry: ...\nCurrent Stock: ...\n\n\nThere must be exactly one blank line after each block — no more, no less.\n\nDo NOT add extra spaces.\nDo NOT add extra blank lines anywhere else.\n\nFormatting Requirements\n\nHeading on line 1 only: EXPIRY WARNING\n\nOne blank line after the heading\n\nFor each medicine:\n\nNo bullet symbols\n\nNo empty lines inside the block\n\nExactly one blank line between medicine blocks\n\nAfter the last medicine block, add one blank line, then:\n\nPLEASE REVIEW AND TAKE ACTION!\n\n\nStrictly follow:\n\nNO double blank lines\n\nNO HTML\n\nNO markdown\n\nNO code blocks\n\nNO JSON inside text\n\nNO brackets\n\nNO symbols not shown in the template\n\n Final JSON Output Format\n\nYour full response MUST be exactly:\n\n[\n  {\n    \"output\": \"FINAL_TEXT_HERE\"\n  }\n]\n\n\nWhere FINAL_TEXT_HERE contains:\n\nThe heading\n\nAll medicine blocks\n\nRequired spacing (one blank line between blocks)\n\nFinal recommendation\n\nAll combined as one plain-text string, with no escaping.\n\nMANDATORY BEHAVIOR\n\nProcess all items in order\n\nDo NOT skip or merge medicines\n\nDo NOT reorder\n\nDo NOT add blank lines except where explicitly allowed\n\nDo NOT include JSON inside the text block\n\nOutput must appear directly inside \"output\" with no escaping.\n\nNEVER STRAY AWAY FROM THESE INSTRUCTIONS. ALWAYS KEEP THE OUTPUT SAME. ITS MANDATORY."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        0,
+        496
+      ],
+      "id": "66dc8eb3-1a49-4e34-aeff-312b15923454",
+      "name": "Writing (Expiry) Alert Telegram"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Here is your input: {{ $json.alertMessages }}",
+        "options": {
+          "systemMessage": "You are generating a Telegram-friendly text digest wrapped inside a JSON response.\n\nYour task is to read and interpret the \"alertMessages\" array provided in the input JSON.\nEach item in this array is one complete alert message for a medicine.\n\nYour Responsibilities\n1. Process EVERY alert message\n\nYou must read every element inside the \"alertMessages\" array.\nDo NOT skip any item for any reason.\nEach alert message must produce one paragraph in the final output.\n\n2. Extract structured values\n\nFrom each alert message, extract:\n\nMedicine Name\n\nCurrent Stock\n\nMinimum Threshold\n\nRecommended Restock Quantity\n\nDays Until Expiry (if available)\n\n\nDo NOT copy the raw alert text.\nYou must interpret and convert into structured lines.\n\n3. Produce ONE combined digest using paragraphs\n\nEach medicine must be shown as one bullet paragraph, using this EXACT format:\n\n• Medicine Name: Paracetamol\nCurrent Stock: 50\nMinimum Threshold: 100\nRecommended Restock: 100\n\nRules:\n\nOne bullet paragraph per medicine.\n\nEach detail on its own new line.\n\nNo tables.\n\nNo HTML.\n\nNo markdown tables.\n\nNo unusual symbols except the bullet \"•\".\n\nNo code blocks.\n\n4. Add ONE final recommendation\n\nAt the end of all medicine paragraphs, include:\n\nImmediate restocking of the above medicines is recommended to prevent shortages.\n\nMandatory.\n\n5. Use only ONE heading\n\nPlace this heading at the top:\n\nLOW STOCK ALERTS\n\nOnly once.\n\n6. Final Output Format\n\nYour final response MUST be:\n\n[\n  {\n    \"output\": \"FINAL_TEXT_HERE\"\n  }\n]\n\n\nWhere \"output\" contains:\n\nHeading\n\nAll medicine paragraphs (one per alert message)\n\nFinal recommendation\n\nEverything must be plain text.\nNO HTML.\nNO escaping.\nNO extra fields.\nNO nested JSON.\nNO JSON inside the string.\nNo backticks within the actual output.\n\n7. Absolutely Mandatory Behavior\n\nProcess all items in the \"alertMessages\" array.\n\nDo NOT guess. Only use values found in the alert message text.\n\nNever remove, skip, or reorder medicines.\n\nOutput must contain exactly one JSON array, with one object, with one key: output.\n\nNEVER STRAY AWAY FROM THESE INSTRUCTIONS. ALWAYS KEEP THE OUTPUT SAME. ITS MANDATORY."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "b00b6c8c-dede-468f-a6e2-9cb3033ff769",
+      "name": "Writing (Low Stock) Telegram"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the outer output string\nconst outer = $json[\"output\"];\n\n// Parse the inner JSON string\nconst parsed = JSON.parse(outer);\n\n// Extract the final output text\nconst finalOutput = parsed[0].output;\n\n// Return it as the node's output\nreturn [\n  {\n    json: {\n      output: finalOutput\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        496
+      ],
+      "id": "2ca70a2c-05a4-4cbd-a660-bcf8986d1c4c",
+      "name": "Formatting Telegram Message Body2"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {
+          "clashHandling": {
+            "values": {
+              "resolveClash": "addSuffix"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        784,
+        304
+      ],
+      "id": "9d17d4df-8346-422f-b3e2-0cd650142cd6",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Here are your inputs:\n1. LOW STOCK ALERT INFO: {{ $json.output_1 }}\n2. EXPIRY ALERT INFO: {{ $json.output_2 }}",
+        "options": {
+          "systemMessage": "You are an AI agent designed to help the hospital admin by combining two sets of input information. The first input will contain details about medicines that are low in stock, and the second input will contain details about medicines that are close to their expiration date.\n\nYour task is to merge these two inputs into a single, well-structured HTML block. This HTML block should be visually appealing and easy to read. It should clearly present the low-stock medicines and the medicines nearing expiration, highlighting key details such as medicine name, quantity, and expiry date.\n\nOnce the HTML block is generated, it will be sent via a webhook to the admin’s page.\n\nEnsure that the final output is clean, organized, and informative, making it easy for the admin to understand the current status of the pharmacy inventory."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1008,
+        304
+      ],
+      "id": "52805f1e-4773-486a-a34d-6a5b8137365b",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1088,
+        528
+      ],
+      "id": "fbcb465f-8476-4ea9-afc5-bf353619b108",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "jTywaPAPNBFR9V7Y",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// INPUT: AI agent output inside items[0].json.output\n// OUTPUT: Clean HTML block\n\nconst raw = items[0].json.output;\n\n// Remove ```html and ``` fencing\nlet clean = raw\n  .replace(/```html/gi, \"\")    // remove starting fence\n  .replace(/```/g, \"\")         // remove closing fence\n  .trim();                      // cleanup spacing\n\nreturn [\n  {\n    json: {\n      output: clean\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        304
+      ],
+      "id": "eaeeea0b-5fa6-4dbe-aedd-79ecf68c550d",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "inventroy-management",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1792,
+        304
+      ],
+      "id": "cbd7ba6a-59ce-4d9b-9ed4-2ebf65ff05c8",
+      "name": "Webhook",
+      "webhookId": "42602d04-34e7-4424-a6a3-62e876004b72"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1792,
+        304
+      ],
+      "id": "80828a9e-599d-475c-b1e6-fda4c039792b",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input data comes from previous node, e.g., webhook or another node\n// Assuming input is an array with one object having key \"output\"\nconst inputData = items[0].json;  // adjust if multiple items\n\n// Transform to frontend expected format\nreturn [\n  {\n    json: {\n      status: \"ok\",\n      summary: inputData.output  // assign the value of \"output\" to \"summary\"\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1568,
+        304
+      ],
+      "id": "65b2388a-7d3c-4b4c-9e8f-819da754d880",
+      "name": "Code in JavaScript1"
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "newteam25.app.n8n.cloud",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36",
+            "content-length": "0",
+            "accept": "*/*",
+            "accept-encoding": "gzip, br",
+            "accept-language": "en-US,en;q=0.9",
+            "cdn-loop": "cloudflare; loops=1; subreqs=1",
+            "cf-connecting-ip": "223.123.21.145",
+            "cf-ew-via": "15",
+            "cf-ipcountry": "PK",
+            "cf-ray": "9ab709d11027fdba-SIN",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "cf-worker": "n8n.cloud",
+            "content-type": "application/json",
+            "origin": "http://127.0.0.1:5500",
+            "priority": "u=1, i",
+            "referer": "http://127.0.0.1:5500/",
+            "sec-ch-ua": "\"Chromium\";v=\"142\", \"Google Chrome\";v=\"142\", \"Not_A Brand\";v=\"99\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "cross-site",
+            "x-forwarded-for": "223.123.21.145, 172.70.208.125",
+            "x-forwarded-host": "newteam25.app.n8n.cloud",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "traefik-prod-users-gwc-80-5fc4f59987-jxvcn",
+            "x-is-trusted": "yes",
+            "x-real-ip": "223.123.21.145"
+          },
+          "params": {},
+          "query": {},
+          "body": {},
+          "webhookUrl": "https://newteam25.app.n8n.cloud/webhook/inventroy-management",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Split Medicines Into Items": {
+      "main": [
+        [
+          {
+            "node": "Check Stock Needed or Not",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Check Medicine is Expired or Not",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Stock Needed or Not": {
+      "main": [
+        [
+          {
+            "node": "Format Low Stock Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Low Stock Alert": {
+      "main": [
+        [
+          {
+            "node": "Combining Low Stock Alerts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Writing (Low Stock) Telegram",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Expiry Alert": {
+      "main": [
+        [
+          {
+            "node": "Combining Expiry Alerts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Writing (Expiry) Alert Telegram",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatting Medicines": {
+      "main": [
+        [
+          {
+            "node": "Split Medicines Into Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Medicines Data": {
+      "main": [
+        [
+          {
+            "node": "Formatting Medicines",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Medicine is Expired or Not": {
+      "main": [
+        [
+          {
+            "node": "Format Expiry Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatting Telegram Message Body": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatting Low Stock Alerts": {
+      "main": [
+        [
+          {
+            "node": "Writing (Low Stock) Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combining Low Stock Alerts": {
+      "main": [
+        [
+          {
+            "node": "Formatting Low Stock Alerts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combining Expiry Alerts": {
+      "main": [
+        [
+          {
+            "node": "Formatting Expiry Alerts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatting Expiry Alerts": {
+      "main": [
+        [
+          {
+            "node": "Writing (Expiry) Alert Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Writing (Expiry) Alert Telegram": {
+      "main": [
+        [
+          {
+            "node": "Formatting Telegram Message Body2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Writing (Low Stock) Telegram": {
+      "main": [
+        [
+          {
+            "node": "Formatting Telegram Message Body",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatting Telegram Message Body2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Medicines Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "544ac485-e3e1-4638-96ba-137dfb808c90",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d6d568813a88aea710aa5796ea28840c458ade99e5fe88b00dc7056afbfca8d0"
+  },
+  "id": "uHQQ7odhkbrr592k",
+  "tags": []
+}
