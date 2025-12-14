@@ -18,18 +18,18 @@ This repository documents the complete architecture, AI logic, workflow structur
 
 ## 📑 Table of Contents
 
-1. [Introduction](#introduction)
-2. [System Architecture](#system-architecture)
+1. [Introduction](#-introduction)
+2. [System Architecture](#️-system-architecture)
 3. [Sequence Diagrams](#sequence-diagrams)
-4. [Environment Variables](#environment-variables)
-5. [API Endpoints](#api-endpoints)
-6. [Folder Structure](#folder-structure)
-7. [Workflow Overview](#workflow-overview)
-8. [Node-Level Documentation](#node-level-documentation)
-9. [Setup Instructions](#setup-instructions)
-10. [Deployment Guide](#deployment-guide)
-11. [Scalability & Limitations](#scalability--limitations)
-12. [Future Improvements](#future-improvements)
+4. [Environment Variables](#️-environment-variables)
+5. [API Endpoints](#-api-endpoints)
+6. [Folder Structure](#-folder-structure)
+7. [Workflow Overview](#-workflow-overview)
+8. [Node-Level Documentation](#-node-level-documentation)
+9. [Setup Instructions](#️-setup-instructions)
+10. [Deployment Guide](#-deployment-guide)
+11. [Scalability & Limitations](#-scalability--limitations)
+12. [Future Improvements](#-future-improvements)
 13. [Cost Considerations](#-scalability--limitations)
 
 ---
@@ -754,5 +754,3 @@ For issues or questions:
 - OpenAI Support: [help.openai.com](https://help.openai.com)
 
 ---
-
-**Built with ❤️ for healthcare automation**
