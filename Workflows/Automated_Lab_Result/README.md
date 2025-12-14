@@ -30,7 +30,7 @@ This repository documents the complete architecture, AI logic, workflow structur
 10. [Deployment Guide](#-deployment-guide)
 11. [Scalability & Limitations](#-scalability--limitations)
 12. [Future Improvements](#-future-improvements)
-13. [Cost Considerations](#-Cost--Considerations)
+13. [Cost Considerations](#-scalability--limitations)
 
 ---
 
