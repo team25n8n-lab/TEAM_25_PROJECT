@@ -1,0 +1,995 @@
+{
+  "name": "Medical Clinic Patient Follow-Up Automation Engine (Gmail Only)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "frontend-intake",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "401de581-cf59-43ed-bf8e-62a776e5d15c",
+      "name": "Frontend Intake Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "57dbadad-8807-4e31-956a-420362946283"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "patient_name",
+              "value": "={{ $json.body.fullName }}",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "phone",
+              "value": "={{ $json.body.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "email",
+              "value": "={{ $json.body.email }}",
+              "type": "string"
+            },
+            {
+              "id": "id-4",
+              "name": "doctor_name",
+              "value": "={{ $json.body.doctor }}",
+              "type": "string"
+            },
+            {
+              "id": "id-5",
+              "name": "specialty",
+              "value": "={{ $json.body.specialty }}",
+              "type": "string"
+            },
+            {
+              "id": "id-6",
+              "name": "due_date",
+              "value": "={{ $json.body.preferredDate }}",
+              "type": "string"
+            },
+            {
+              "id": "id-7",
+              "name": "status",
+              "value": "pending",
+              "type": "string"
+            },
+            {
+              "id": "id-8",
+              "name": "sent",
+              "value": false,
+              "type": "boolean"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0e3d16e8-4507-4862-a463-b24ecf0f9aeb",
+      "name": "Map Intake Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "tableId": "followups",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "patient_name",
+              "fieldValue": "={{ $json.patient_name }}"
+            },
+            {
+              "fieldId": "phone",
+              "fieldValue": "={{ $json.phone }}"
+            },
+            {
+              "fieldId": "email",
+              "fieldValue": "={{ $json.email }}"
+            },
+            {
+              "fieldId": "doctor_name",
+              "fieldValue": "={{ $json.doctor_name }}"
+            },
+            {
+              "fieldId": "specialty",
+              "fieldValue": "={{ $json.specialty }}"
+            },
+            {
+              "fieldId": "due_date",
+              "fieldValue": "={{ $json.due_date }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "={{ $json.status }}"
+            },
+            {
+              "fieldId": "sent",
+              "fieldValue": "={{ $json.sent }}"
+            }
+          ]
+        }
+      },
+      "id": "356708b6-acc7-42e5-b105-13af9cfa9678",
+      "name": "Insert Follow-up Record",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        448,
+        0
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "qywKdYnXakdq8q7b",
+          "name": "Supabase account for follow up workflow"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "audit_log",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "action",
+              "fieldValue": "intake_received"
+            },
+            {
+              "fieldId": "actor",
+              "fieldValue": "system"
+            }
+          ]
+        }
+      },
+      "id": "21faa34d-78ab-4963-9890-f3ae47b542eb",
+      "name": "Log Intake Audit",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        672,
+        0
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "qywKdYnXakdq8q7b",
+          "name": "Supabase account for follow up workflow"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"success\": true,\n  \"message\": \"Follow-up scheduled successfully\"\n}",
+        "options": {}
+      },
+      "id": "bea0c896-778e-4d7a-a280-6844a46fc429",
+      "name": "Respond Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        896,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "id": "3dcb4b10-0ebf-4b8c-a5d3-dc5f20107590",
+      "name": "Daily 9 AM Reminder Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "followups",
+        "returnAll": true,
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "due_date",
+              "condition": "eq",
+              "keyValue": "={{ $now.toFormat('yyyy-MM-dd') }}"
+            },
+            {
+              "keyName": "sent",
+              "condition": "eq",
+              "keyValue": "false"
+            },
+            {
+              "keyName": "status",
+              "condition": "eq",
+              "keyValue": "pending"
+            }
+          ]
+        }
+      },
+      "id": "18dd7923-5b65-4a0b-ae38-0f4a372003ba",
+      "name": "Query Due Follow-ups",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        224,
+        224
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "qywKdYnXakdq8q7b",
+          "name": "Supabase account for follow up workflow"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "id-1",
+              "leftValue": "={{ $items(\"Query Due Follow-ups\").length }}\n",
+              "rightValue": 0,
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "f2aa78cd-42b4-4b1c-96f2-f0f5c46e2e9f",
+      "name": "Check If Results Exist",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Generate a professional and caring appointment reminder email for:\n\nPatient Name: {{ $json.patient_name }}\nDoctor: {{ $json.doctor_name }}\nSpecialty: {{ $json.specialty }}\nAppointment Date: {{ $json.due_date }}\n\nThe message should:\n- Be warm and professional\n- Remind them of their upcoming appointment\n- Ask them to reply with YES to confirm, NO to cancel, or RESCHEDULE if they need a different time\n- Keep it concise and friendly\n\nReturn only the email body text."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "62312f68-44ed-40c2-b329-5f9095f80550",
+      "name": "Generate Reminder Message",
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        672,
+        224
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "pDFcfP5yvzPAuy68",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Check If Results Exist').item.json.email }}",
+        "subject": "={{ 'Appointment Reminder - ' + $json.specialty }}",
+        "message": "=<p>Hello {{ $('Check If Results Exist').item.json.patient_name }},</p>\n\n<p>This is a reminder for your upcoming appointment.</p>\n\n<p>\n<b>Doctor:</b>{{ $('Check If Results Exist').item.json.doctor_name }} <br/>\n<b>Specialty:</b> {{ $('Check If Results Exist').item.json.specialty }}<br/>\n<b>Date:</b> {{ $('Check If Results Exist').item.json.due_date }}\n</p>\n\n<p>Please confirm your availability by clicking one option below:</p>\n\n<p>\n<a href=\"https://hafizahmad17.app.n8n.cloud/webhook/patient-reply?phone={{ $('Check If Results Exist').item.json.phone }}&reply=yes\"\n   style=\"padding:10px 15px;background:#16a34a;color:#fff;text-decoration:none;border-radius:5px;\">\n   ✅ YES, I’m coming\n</a>\n</p>\n\n<p>\n<a href=\"https://hafizahmad17.app.n8n.cloud/webhook/patient-reply?phone={{ $('Check If Results Exist').item.json.phone }}&reply=no\"\n   style=\"padding:10px 15px;background:#dc2626;color:#fff;text-decoration:none;border-radius:5px;\">\n   ❌ NO, I can’t come\n</a>\n</p>\n\n<p>\n<a href=\"https://hafizahmad17.app.n8n.cloud/webhook/patient-reply?phone={{ $('Check If Results Exist').item.json.phone }}&reply=reschedule\"\n   style=\"padding:10px 15px;background:#2563eb;color:#fff;text-decoration:none;border-radius:5px;\">\n   🔄 RESCHEDULE\n</a>\n</p>\n\n<p>Thank you.</p>\n",
+        "options": {}
+      },
+      "id": "41ac1116-9ad7-4101-a9ab-5fc6e41e7316",
+      "name": "Send Reminder Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1024,
+        224
+      ],
+      "webhookId": "e35d418e-d832-4f61-b1f1-f52c14912385",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "jhqSTdUguQruXeFP",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "followups",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Query Due Follow-ups').item.json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "sent",
+              "fieldValue": "true"
+            }
+          ]
+        }
+      },
+      "id": "0e44de01-92ce-4a66-87c1-448631a812a6",
+      "name": "Update Sent Status",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1248,
+        224
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "qywKdYnXakdq8q7b",
+          "name": "Supabase account for follow up workflow"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "audit_log",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "action",
+              "fieldValue": "reminder_sent"
+            },
+            {
+              "fieldId": "actor",
+              "fieldValue": "system"
+            }
+          ]
+        }
+      },
+      "id": "c2af75df-0b94-4697-b00d-5a428c6e92b9",
+      "name": "Log Reminder Sent Audit",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1472,
+        224
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "qywKdYnXakdq8q7b",
+          "name": "Supabase account for follow up workflow"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "patient-reply",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "6c8041dd-a9b1-46c8-8d1a-f9c7f61b505d",
+      "name": "Patient Reply Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        448
+      ],
+      "webhookId": "eaf10fb5-e62c-423b-81c8-a13bf9a87b01"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get raw values from webhook\nlet phone = ($json.query.phone || \"\").trim();\nconst reply = ($json.query.reply || \"\").toLowerCase();\n\n// Normalize phone number\n// Ensure it always starts with +\nif (!phone.startsWith(\"+\")) {\n  phone = \"+\" + phone;\n}\n\nlet status;\n\nif (reply === \"yes\") {\n  status = \"done\";\n} else if (reply === \"no\") {\n  status = \"missed\";\n} else if (reply === \"reschedule\") {\n  status = \"rescheduled\";\n} else {\n  throw new Error(\"Invalid reply value\");\n}\n\nreturn [\n  {\n    json: {\n      phone,\n      status,\n      response: reply\n    }\n  }\n];\n"
+      },
+      "id": "7ad11baf-5ebd-4416-ab3b-416e9588edb4",
+      "name": "Determine Status Update",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        320,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "followups",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "phone",
+              "condition": "eq",
+              "keyValue": "={{ $json.phone }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "={{ $json.status }}"
+            },
+            {
+              "fieldId": "response",
+              "fieldValue": "={{ $json.response }}"
+            }
+          ]
+        }
+      },
+      "id": "1eb4c66b-da5d-4d10-b731-93152b5d7980",
+      "name": "Update Patient Status",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        672,
+        448
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "qywKdYnXakdq8q7b",
+          "name": "Supabase account for follow up workflow"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "audit_log",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "action",
+              "fieldValue": "patient_reply_processed"
+            },
+            {
+              "fieldId": "actor",
+              "fieldValue": "system"
+            }
+          ]
+        }
+      },
+      "id": "2926441a-a1a8-4f62-8f99-25fc5c95d1d6",
+      "name": "Log Reply Audit",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        960,
+        448
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "qywKdYnXakdq8q7b",
+          "name": "Supabase account for follow up workflow"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"success\": true,\n  \"message\": \"Reply processed successfully\"\n}",
+        "options": {}
+      },
+      "id": "7d7c34a4-7d4a-4b7d-b54f-688fb0afb72c",
+      "name": "Respond Reply Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1152,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 19
+            }
+          ]
+        }
+      },
+      "id": "5e409805-527b-4bc0-8c5c-89f4ea080d57",
+      "name": "Daily 7 PM Summary Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        672
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "followups",
+        "returnAll": true,
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "due_date",
+              "condition": "eq",
+              "keyValue": "={{ $now.toFormat('yyyy-MM-dd') }}"
+            }
+          ]
+        }
+      },
+      "id": "50b3f7fb-abe9-4463-bc46-82a889d82579",
+      "name": "Fetch Today's Follow-ups",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        224,
+        672
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "qywKdYnXakdq8q7b",
+          "name": "Supabase account for follow up workflow"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nconst stats = {\n  total: items.length,\n  completed: items.filter(i => i.json.status === 'done').length,\n  missed: items.filter(i => i.json.status === 'missed').length,\n  pending: items.filter(i => i.json.status === 'pending').length,\n  rescheduled: items.filter(i => i.json.status === 'rescheduled').length\n};\n\nreturn [{ json: stats }];"
+      },
+      "id": "f203b67f-0f73-4234-b7e0-bcfe83747bde",
+      "name": "Aggregate Stats",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        672
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Generate a professional daily summary report for the doctor with the following statistics:\nDate: {{ new Date().toISOString().slice(0, 10) }}\nTotal Follow-ups Today: {{ $json.total }}\nCompleted: {{ $json.completed }}\nMissed: {{ $json.missed }}\nPending: {{ $json.pending }}\nRescheduled: {{ $json.rescheduled }}\n\nFormat this as a clear, professional email summary that highlights key metrics and any areas needing attention.\nAt the end after sincerley use Hafiz Ahmad Adil\nAdministrator Hospital"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5e75d12b-9e87-478d-af22-ab24a40f69f2",
+      "name": "Generate Summary Report",
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        672,
+        672
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "pDFcfP5yvzPAuy68",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "ahmad.adil.gudgk@gmail.com",
+        "subject": "={{ 'Daily Follow-up Summary - ' + $now.toFormat('yyyy-MM-dd') }}",
+        "emailType": "text",
+        "message": "={{ $json.content.parts[0].text }}",
+        "options": {}
+      },
+      "id": "b2619d6c-cbd0-4b6f-9baa-8c657d6b4862",
+      "name": "Send Summary to Doctor",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1024,
+        672
+      ],
+      "webhookId": "70669610-61e3-43c4-9832-e1c4cde563ce",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "jhqSTdUguQruXeFP",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "audit_log",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "action",
+              "fieldValue": "daily_summary_sent"
+            },
+            {
+              "fieldId": "actor",
+              "fieldValue": "system"
+            }
+          ]
+        }
+      },
+      "id": "7a163639-2bce-4c24-9367-750aef194c34",
+      "name": "Log Summary Audit",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1248,
+        672
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "qywKdYnXakdq8q7b",
+          "name": "Supabase account for follow up workflow"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Frontend Intake Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "hafizahmad17.app.n8n.cloud",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36",
+            "content-length": "155",
+            "accept": "*/*",
+            "accept-encoding": "gzip, br",
+            "accept-language": "en-US,en;q=0.9",
+            "cdn-loop": "cloudflare; loops=1; subreqs=1",
+            "cf-connecting-ip": "182.186.21.80",
+            "cf-ew-via": "15",
+            "cf-ipcountry": "PK",
+            "cf-ray": "9ae3f625a558d439-SIN",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "cf-worker": "n8n.cloud",
+            "content-type": "application/json",
+            "origin": "null",
+            "priority": "u=1, i",
+            "sec-ch-ua": "\"Chromium\";v=\"142\", \"Google Chrome\";v=\"142\", \"Not_A Brand\";v=\"99\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "cross-site",
+            "x-forwarded-for": "182.186.21.80, 172.71.82.77",
+            "x-forwarded-host": "hafizahmad17.app.n8n.cloud",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "traefik-prod-users-gwc-37-d47f5fc8c-wzt5x",
+            "x-is-trusted": "yes",
+            "x-real-ip": "182.186.21.80"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "fullName": "hafi",
+            "phone": "+923346472222",
+            "email": "ahmad.adil.gudgk@gmail.com",
+            "specialty": "Heart Diese",
+            "doctor": "Dr Sarah",
+            "preferredDate": "2025-12-17"
+          },
+          "webhookUrl": "https://hafizahmad17.app.n8n.cloud/webhook/frontend-intake",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Patient Reply Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "hafizahmad17.app.n8n.cloud",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36",
+            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+            "accept-encoding": "gzip, br",
+            "accept-language": "en-US,en;q=0.9",
+            "cdn-loop": "cloudflare; loops=1; subreqs=1",
+            "cf-connecting-ip": "182.186.37.94",
+            "cf-ew-via": "15",
+            "cf-ipcountry": "PK",
+            "cf-ray": "9ae5dad8051d0519-SIN",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "cf-worker": "n8n.cloud",
+            "cookie": "rl_page_init_referrer=RudderEncrypt%3AU2FsdGVkX19aXzA6alOx7iuwg0nf9w5v9BWO0rmZLFBY7trRlrsQ9ynTjhSOlSwJgZAu7OAO3gw6SUDXz31pZQ%3D%3D; rl_page_init_referring_domain=RudderEncrypt%3AU2FsdGVkX19lZqpBtJVDNM%2BSIDmPYYxeNwcSkujVzFo%2FSGd3vlYRbxZUN6YT8qPj; _ga=GA1.1.1420809548.1765552138; _fbp=fb.1.1765552137663.22383588470717172; _ga_0SC4FF2FH9=GS2.1.s1765552137$o1$g1$t1765552183$j14$l0$h0; rl_anonymous_id=RudderEncrypt%3AU2FsdGVkX1%2Bdzt6LWY9Y7V2U2vXdCPDSGW9VKvBjb%2BMjXWEKHwJxPU1puFd0pwzaKFYfsQvjZeisGckyV%2BtgUQ%3D%3D; rl_user_id=RudderEncrypt%3AU2FsdGVkX1%2FPe%2B%2Fls5MTQSD%2Fs8duejrI8BzP4a2Vsk%2BmUA3aLNhoJGy%2BQQpqps4I%2BXKUOGeSLn7dhzJvkFYmhfqeFD7RMpecTGWLPfihEoRIfjP5cgGe1uYqI0EHdOLx8TwsQJw3Tncsg%2FrMwsTC24928W0IYz6DgmMvAfgFxG4%3D; rl_trait=RudderEncrypt%3AU2FsdGVkX1%2FOVGnyYV5M96TLpUl3FM%2B%2BW6VIGVrbijoYQeKWJEwm2%2Bfe6tgZZrCe9u04gLSsysGIiqhagthGebwcPxolSVvSaT1YvcXYW%2ByakCYZ7UdN3Yf0Hjnh4pAIkS4GgAYjBQFBAcChcflmHE9T14tGmiq04M0fuPjptQ4t9iA89Ew%2BO3E9ATOzJrBjd4T7Vv499fxHKjwhhK0l3w%3D%3D; rl_session=RudderEncrypt%3AU2FsdGVkX18vZpihVHbYaZud%2FYlPKFx1cyIvHtA%2BGFE4GONYbuFmILBMdTN6ezVk%2Bge6QLwdZ7UZLTRoNktobM7j1dx%2BZTNXFICuOAo3lf%2B56NacvnENf6TrHFjbKnsJkh4xLDUJlJo6zPrM%2FqAcYg%3D%3D; ph_phc_4URIAm1uYfJO7j8kWSe0J8lc8IqnstRLS7Jx8NcakHo_posthog=%7B%22distinct_id%22%3A%22f2eb02fcf2645c981075720535c1059581a456e2053253f55352ea1a04f9ff9a%23f92ee259-92db-4ab0-b81f-803e2d33cc75%22%2C%22%24sesid%22%3A%5Bnull%2Cnull%2Cnull%5D%2C%22%24epp%22%3Atrue%2C%22%24initial_person_info%22%3A%7B%22r%22%3A%22https%3A%2F%2Fhafizahmadad.app.n8n.cloud%2F%22%2C%22u%22%3A%22https%3A%2F%2Fhafizahmadad.app.n8n.cloud%2Fsignin%3Fredirect%3D%25252F%22%7D%7D",
+            "priority": "u=0, i",
+            "sec-ch-ua": "\"Chromium\";v=\"142\", \"Google Chrome\";v=\"142\", \"Not_A Brand\";v=\"99\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "document",
+            "sec-fetch-mode": "navigate",
+            "sec-fetch-site": "cross-site",
+            "sec-fetch-user": "?1",
+            "upgrade-insecure-requests": "1",
+            "x-forwarded-for": "182.186.37.94, 172.69.165.17",
+            "x-forwarded-host": "hafizahmad17.app.n8n.cloud",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "traefik-prod-users-gwc-37-d47f5fc8c-dlxc5",
+            "x-is-trusted": "yes",
+            "x-real-ip": "182.186.37.94"
+          },
+          "params": {},
+          "query": {
+            "phone": " 923346472222",
+            "reply": "yes"
+          },
+          "body": {},
+          "webhookUrl": "https://hafizahmad17.app.n8n.cloud/webhook/patient-reply",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Frontend Intake Webhook": {
+      "main": [
+        [
+          {
+            "node": "Map Intake Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map Intake Data": {
+      "main": [
+        [
+          {
+            "node": "Insert Follow-up Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Follow-up Record": {
+      "main": [
+        [
+          {
+            "node": "Log Intake Audit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Intake Audit": {
+      "main": [
+        [
+          {
+            "node": "Respond Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily 9 AM Reminder Trigger": {
+      "main": [
+        [
+          {
+            "node": "Query Due Follow-ups",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Due Follow-ups": {
+      "main": [
+        [
+          {
+            "node": "Check If Results Exist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check If Results Exist": {
+      "main": [
+        [
+          {
+            "node": "Generate Reminder Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Reminder Message": {
+      "main": [
+        [
+          {
+            "node": "Send Reminder Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Reminder Email": {
+      "main": [
+        [
+          {
+            "node": "Update Sent Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Sent Status": {
+      "main": [
+        [
+          {
+            "node": "Log Reminder Sent Audit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Patient Reply Webhook": {
+      "main": [
+        [
+          {
+            "node": "Determine Status Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Determine Status Update": {
+      "main": [
+        [
+          {
+            "node": "Update Patient Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Patient Status": {
+      "main": [
+        [
+          {
+            "node": "Log Reply Audit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Reply Audit": {
+      "main": [
+        [
+          {
+            "node": "Respond Reply Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily 7 PM Summary Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Today's Follow-ups",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Today's Follow-ups": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Stats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Stats": {
+      "main": [
+        [
+          {
+            "node": "Generate Summary Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Summary Report": {
+      "main": [
+        [
+          {
+            "node": "Send Summary to Doctor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Summary to Doctor": {
+      "main": [
+        [
+          {
+            "node": "Log Summary Audit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2b688a60-af24-4f21-896f-78ded4442bbb",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d6d568813a88aea710aa5796ea28840c458ade99e5fe88b00dc7056afbfca8d0"
+  },
+  "id": "x2tvSTNIyZbxifc0",
+  "tags": []
+}
