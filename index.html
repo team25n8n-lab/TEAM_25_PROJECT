@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthcare Automation Agency</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; }
+        .hidden { display: none !important; }
+        .response-content { max-width: 100%; overflow-wrap: break-word; }
+        .loading { opacity: 0.6; pointer-events: none; }
+        
+        /* Loading Spinner Styles */
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #2563eb;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Success Alert Fade-in Animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .success-alert {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
+
+<!-- Home Page -->
+<div id="home-page" class="container mx-auto px-4 py-12">
+    <header class="text-center mb-16">
+        <h1 class="text-5xl font-bold text-gray-800 mb-4">Healthcare Automation Agency</h1>
+        <p class="text-xl text-gray-600">Streamlining healthcare workflows with intelligent automation</p>
+    </header>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+        <div class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden">
+            <div class="bg-blue-500 p-6 text-white">
+                <svg class="w-12 h-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <h3 class="text-2xl font-bold mb-2">Automated Lab Result</h3>
+            </div>
+            <div class="p-6">
+                <p class="text-gray-600 mb-6 min-h-[60px]">Automated processing and delivery of lab results to patients and doctors</p>
+                <button onclick="showWorkflow('automated-lab-result')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200">Try Now</button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden">
+            <div class="bg-green-500 p-6 text-white">
+                <svg class="w-12 h-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                <h3 class="text-2xl font-bold mb-2">Symptoms Checker</h3>
+            </div>
+            <div class="p-6">
+                <p class="text-gray-600 mb-6 min-h-[60px]">AI-powered symptom analysis and medical guidance</p>
+                <button onclick="showWorkflow('symptoms-checker')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200">Try Now</button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden">
+            <div class="bg-orange-500 p-6 text-white">
+                <svg class="w-12 h-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                <h3 class="text-2xl font-bold mb-2">Pharmacy Inventory</h3>
+            </div>
+            <div class="p-6">
+                <p class="text-gray-600 mb-6 min-h-[60px]">Automated inventory tracking and expiry notifications</p>
+                <button onclick="showWorkflow('pharmacy-inventory')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200">Try Now</button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden">
+            <div class="bg-purple-500 p-6 text-white">
+                <svg class="w-12 h-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                <h3 class="text-2xl font-bold mb-2">Medical Record OCR</h3>
+            </div>
+            <div class="p-6">
+                <p class="text-gray-600 mb-6 min-h-[60px]">Intelligent OCR extraction from medical documents</p>
+                <button onclick="showWorkflow('medical-record-ocr')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200">Try Now</button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden">
+            <div class="bg-cyan-500 p-6 text-white">
+                <svg class="w-12 h-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                <h3 class="text-2xl font-bold mb-2">Appointment Booking</h3>
+            </div>
+            <div class="p-6">
+                <p class="text-gray-600 mb-6 min-h-[60px]">Smart appointment scheduling with automated reminders</p>
+                <button onclick="showWorkflow('appointment-booking')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200">Try Now</button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden">
+            <div class="bg-teal-500 p-6 text-white">
+                <svg class="w-12 h-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                <h3 class="text-2xl font-bold mb-2">Patient Follow-Up</h3>
+            </div>
+            <div class="p-6">
+                <p class="text-gray-600 mb-6 min-h-[60px]">Automated patient follow-up reminders and tracking</p>
+                <button onclick="showWorkflow('patient-followup')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200">Try Now</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Workflow Pages -->
+<div id="workflow-container" class="hidden container mx-auto px-4 py-8">
+    <button onclick="showHome()" class="flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-8 font-semibold">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        Back to Home
+    </button>
+
+    <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl p-8">
+        <h2 id="workflow-title" class="text-3xl font-bold text-gray-800 mb-2"></h2>
+        <p id="workflow-description" class="text-gray-600 mb-8"></p>
+        <div id="workflow-content"></div>
+        <div id="response-container" class="hidden mt-6 p-6 bg-green-50 border border-green-200 rounded-lg">
+            <h3 class="text-lg font-semibold text-green-800 mb-3">Response</h3>
+            <div id="response-content" class="text-gray-700 response-content"></div>
+        </div>
+        <div id="error-container" class="hidden mt-6 p-4 bg-red-50 border border-red-200 rounded-lg"></div>
+    </div>
+</div>
+
+<!-- Chatbot -->
+<div id="chatbot-window" class="hidden fixed bottom-24 right-6 w-96 h-[500px] bg-white rounded-2xl shadow-2xl flex flex-col z-50">
+    <div class="bg-blue-600 text-white p-4 rounded-t-2xl flex justify-between items-center">
+        <h3 class="font-semibold">Healthcare Assistant</h3>
+        <button onclick="toggleChat()" class="hover:bg-blue-700 p-1 rounded">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+    </div>
+    <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3">
+        <div class="bg-gray-100 p-3 rounded-lg mr-auto max-w-[80%]">Hello! How can I assist you today?</div>
+    </div>
+    <div class="p-4 border-t border-gray-200">
+        <div class="flex gap-2">
+            <input type="text" id="chat-input" placeholder="Type your message..." class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" onkeypress="if(event.key==='Enter') sendChatMessage()">
+            <button onclick="sendChatMessage()" class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<button onclick="toggleChat()" class="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-2xl z-40 hover:scale-110 transition-all">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+</button>
+
+<script>
+// ============================================
+// 🔧 CONFIGURATION SECTION - EDIT YOUR WEBHOOK URLs HERE
+// ============================================
+const WORKFLOW_ENDPOINTS = {
+    'automated-lab-result': 'https://newteam25.app.n8n.cloud/webhook/lab-result',
+    'symptoms-checker': 'https://newteam25.app.n8n.cloud/webhook/symptoms-checker',
+    'pharmacy-inventory': 'https://newteam25.app.n8n.cloud/webhook/inventroy-management',
+    'medical-record-ocr': 'https://newteam25.app.n8n.cloud/webhook/ocr-upload',
+    'appointment-booking': 'https://newteam25.app.n8n.cloud/webhook/request-appointments',
+    'appointment-booking-confirm': 'https://newteam25.app.n8n.cloud/webhook/confirm-appointment',
+    'patient-followup': 'https://newteam25.app.n8n.cloud/webhook/frontend-intake'
+};
+
+// Optional: Configure chatbot URL here
+const CHATBOT_URL = ''; // Leave empty or add your chatbot URL
+// ============================================
+// END CONFIGURATION
+// ============================================
+
+// Doctor-Specialty Mapping
+const DOCTOR_SPECIALTY_MAP = {
+    'Cardiology': ['Dr. Ahmed', 'Dr. Ayesha'],
+    'Neurology': ['Dr. Sara', 'Dr. Luca'],
+    'Orthopedics': ['Dr. Hassan', 'Dr. Emil'],
+    'Pediatrics': ['Dr. Noor', 'Dr. Youssef'],
+    'Dermatology': ['Dr. Karim', 'Dr. Amina'],
+    'Psychiatry': ['Dr. Farah', 'Dr. Ibrahim'],
+    'Ophthalmology': ['Dr. Salim', 'Dr. Nadia'],
+    'Gastroenterology': ['Dr. Omar Farooq', 'Dr. Hana']
+};
+
+let currentWorkflow = null;
+let formData = {};
+let availableSlots = [];
+let selectedSlot = null;
+
+const BLUEPRINTS = {
+    'automated-lab-result': {
+        name: 'Automated Lab Result',
+        description: 'Automated processing and delivery of lab results to patients and doctors',
+        fields: [
+            {name: 'patient_name', type: 'text', required: true, label: 'Patient Name'},
+            {name: 'patient_id', type: 'text', required: true, label: 'Patient ID'},
+            {name: 'patient_email', type: 'email', required: true, label: 'Patient Email'},
+            {name: 'patient_doctor_email', type: 'email', required: true, label: 'Doctor Email'},
+            {name: 'file_url', type: 'file', required: true, label: 'Lab Report PDF', accept: 'application/pdf'},
+            {name: 'file_name', type: 'text', required: true, label: 'File Name'}
+        ]
+    },
+    'symptoms-checker': {
+        name: 'Symptoms Checker',
+        description: 'AI-powered symptom analysis and medical guidance',
+        fields: [
+            {name: 'name', type: 'text', required: true, label: 'Full Name'},
+            {name: 'email', type: 'email', required: true, label: 'Email Address'},
+            {name: 'age', type: 'number', required: true, label: 'Age'},
+            {name: 'gender', type: 'select', required: true, label: 'Gender', options: ['Male', 'Female', 'Other']},
+            {name: 'symptoms', type: 'textarea', required: true, label: 'Describe Your Symptoms'},
+            {name: 'duration', type: 'text', required: true, label: 'How Long Have You Had These Symptoms?'},
+            {name: 'existing_medicines', type: 'textarea', required: false, label: 'Current Medications (if any)'}
+        ]
+    },
+    'pharmacy-inventory': {
+        name: 'Pharmacy Inventory Management & Expiry Alerts',
+        description: 'Automated inventory tracking and expiry notifications',
+        special: 'check-only'
+    },
+    'medical-record-ocr': {
+        name: 'Medical Record OCR Automation',
+        description: 'Intelligent OCR extraction from medical documents',
+        fields: [
+            {name: 'file', type: 'file', required: true, label: 'Medical Record Document', accept: 'application/pdf,image/*'}
+        ]
+    },
+    'appointment-booking': {
+        name: 'Appointment Booking',
+        description: 'Smart appointment scheduling with automated reminders',
+        fields: [
+            {name: 'specialty', type: 'select', required: true, label: 'Specialty', options: ['Cardiology', 'Neurology', 'Orthopedics', 'Pediatrics', 'Dermatology', 'Psychiatry', 'Ophthalmology', 'Gastroenterology']},
+            {name: 'doctor', type: 'select', required: true, label: 'Doctor', options: [], disabled: true},
+            {name: 'date', type: 'date', required: true, label: 'Preferred Date'}
+        ],
+        confirmFields: [
+            {name: 'patient_name', type: 'text', required: true, label: 'Patient Name'},
+            {name: 'email', type: 'email', required: true, label: 'Email'},
+            {name: 'phone', type: 'tel', required: true, label: 'Phone Number'}
+        ]
+    },
+    'patient-followup': {
+    name: 'Appointment Follow-Up Form',
+    description: 'Collect patient details and send them to the clinic for follow-up',
+    fields: [
+        { name: 'fullName', type: 'text', required: true, label: 'Full Name' },
+        { name: 'phone', type: 'tel', required: true, label: 'Phone Number' },
+        { name: 'email', type: 'email', required: true, label: 'Email Address' },
+        { name: 'specialty', type: 'text', required: true, label: 'Specialty' },
+        { name: 'doctor', type: 'text', required: true, label: 'Doctor Name' },
+        { name: 'preferredDate', type: 'date', required: true, label: 'Preferred Date' }
+    ]
+}
+
+};
+
+function showHome() {
+    document.getElementById('home-page').classList.remove('hidden');
+    document.getElementById('workflow-container').classList.add('hidden');
+    currentWorkflow = null;
+    formData = {};
+    availableSlots = [];
+    selectedSlot = null;
+}
+
+function showWorkflow(workflowId) {
+    currentWorkflow = workflowId;
+    const blueprint = BLUEPRINTS[workflowId];
+    
+    document.getElementById('home-page').classList.add('hidden');
+    document.getElementById('workflow-container').classList.remove('hidden');
+    document.getElementById('workflow-title').textContent = blueprint.name;
+    document.getElementById('workflow-description').textContent = blueprint.description;
+    document.getElementById('response-container').classList.add('hidden');
+    document.getElementById('error-container').classList.add('hidden');
+    
+    if (blueprint.special === 'check-only') {
+        renderCheckOnly();
+    } else {
+        renderForm(blueprint);
+    }
+}
+
+function renderCheckOnly() {
+    document.getElementById('workflow-content').innerHTML = `
+        <div class="text-center">
+            <button id="check-inventory-btn" onclick="handleCheckInventory()" class="bg-orange-600 hover:bg-orange-700 text-white font-bold py-4 px-8 rounded-lg text-lg">
+                Check Inventory
+            </button>
+        </div>
+    `;
+}
+
+function renderForm(blueprint) {
+    const container = document.getElementById('workflow-content');
+    let html = '<div class="space-y-6">';
+    
+    blueprint.fields.forEach(field => {
+        html += `<div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+                ${field.label} ${field.required ? '<span class="text-red-500">*</span>' : ''}
+            </label>`;
+        
+        if (field.type === 'textarea') {
+            html += `<textarea id="${field.name}" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>`;
+        } else if (field.type === 'file') {
+            html += `<input type="file" id="${field.name}" accept="${field.accept || ''}" class="w-full px-4 py-2 border border-gray-300 rounded-lg">`;
+        } else if (field.type === 'select') {
+            html += `<select id="${field.name}" ${field.disabled ? 'disabled' : ''} class="w-full px-4 py-2 border border-gray-300 rounded-lg ${field.disabled ? 'bg-gray-100 cursor-not-allowed' : ''}">
+                <option value="">Select ${field.label}</option>`;
+            if (field.options) {
+                field.options.forEach(opt => {
+                    html += `<option value="${opt}">${opt}</option>`;
+                });
+            }
+            html += '</select>';
+        } else {
+            html += `<input type="${field.type}" id="${field.name}" class="w-full px-4 py-2 border border-gray-300 rounded-lg">`;
+        }
+        
+        html += '</div>';
+    });
+    
+    html += '<button id="submit-btn" onclick="handleSubmit()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg">Submit</button>';
+    html += '</div>';
+    
+    container.innerHTML = html;
+    
+    // Add file change listeners
+    blueprint.fields.forEach(field => {
+        if (field.type === 'file') {
+            document.getElementById(field.name).addEventListener('change', function(e) {
+                handleFileChange(field.name, e.target.files[0]);
+            });
+        }
+    });
+    
+    // Special handling for appointment booking
+    if (currentWorkflow === 'appointment-booking') {
+        const specialtySelect = document.getElementById('specialty');
+        const doctorSelect = document.getElementById('doctor');
+        
+        specialtySelect.addEventListener('change', function() {
+            const selectedSpecialty = this.value;
+            if (selectedSpecialty) {
+                doctorSelect.disabled = false;
+                doctorSelect.classList.remove('bg-gray-100', 'cursor-not-allowed');
+                doctorSelect.innerHTML = '<option value="">Select Doctor</option>';
+                const doctors = DOCTOR_SPECIALTY_MAP[selectedSpecialty] || [];
+                doctors.forEach(doc => {
+                    doctorSelect.innerHTML += `<option value="${doc}">${doc}</option>`;
+                });
+            } else {
+                doctorSelect.disabled = true;
+                doctorSelect.classList.add('bg-gray-100', 'cursor-not-allowed');
+                doctorSelect.innerHTML = '<option value="">Select Doctor</option>';
+            }
+        });
+    }
+}
+
+function handleFileChange(fieldName, file) {
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onloadend = function() {
+        // Store the base64 data
+        formData[fieldName] = reader.result;
+        
+        // For Medical Record OCR, also set file_name
+        if (currentWorkflow === 'medical-record-ocr') {
+            formData['file_name'] = file.name;
+        }
+        
+        // For Automated Lab Result, set both file_url and file_name
+        if (currentWorkflow === 'automated-lab-result') {
+            formData['file_url'] = reader.result;
+            formData['file_name'] = file.name;
+        }
+    };
+    reader.readAsDataURL(file);
+}
+
+function collectFormData() {
+    const blueprint = BLUEPRINTS[currentWorkflow];
+    
+    // Preserve existing file data
+    const existingFileData = {};
+    blueprint.fields.forEach(field => {
+        if (field.type === 'file' && formData[field.name]) {
+            existingFileData[field.name] = formData[field.name];
+        }
+    });
+    
+    // Reset formData
+    formData = {};
+    
+    // Collect non-file fields
+    blueprint.fields.forEach(field => {
+        if (field.type !== 'file') {
+            const el = document.getElementById(field.name);
+            if (el) {
+                formData[field.name] = el.value;
+            }
+        }
+    });
+    
+    // Restore file data
+    Object.keys(existingFileData).forEach(key => {
+        formData[key] = existingFileData[key];
+    });
+    
+    return formData;
+}
+
+function validateForm() {
+    const blueprint = BLUEPRINTS[currentWorkflow];
+    
+    for (const field of blueprint.fields) {
+        if (field.required && !formData[field.name]) {
+            alert(`Please fill in: ${field.label}`);
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+// CHANGE 1: Loading spinner function
+function setButtonLoading(buttonId, isLoading) {
+    const button = document.getElementById(buttonId);
+    if (!button) return;
+    
+    if (isLoading) {
+        button.disabled = true;
+        button.classList.add('opacity-60', 'cursor-not-allowed');
+        const originalText = button.innerHTML;
+        button.setAttribute('data-original-text', originalText);
+        button.innerHTML = '<span class="spinner"></span>Processing...';
+    } else {
+        button.disabled = false;
+        button.classList.remove('opacity-60', 'cursor-not-allowed');
+        const originalText = button.getAttribute('data-original-text');
+        if (originalText) {
+            button.innerHTML = originalText;
+        }
+    }
+}
+
+async function handleSubmit() {
+    collectFormData();
+    
+    if (!validateForm()) return;
+    
+    setButtonLoading('submit-btn', true);
+    hideMessages();
+    
+    try {
+        let response;
+        
+        // Special handling for file upload workflows
+        if (currentWorkflow === 'medical-record-ocr' || currentWorkflow === 'automated-lab-result') {
+            const formDataObj = new FormData();
+            
+            // Get the file input element
+            const blueprint = BLUEPRINTS[currentWorkflow];
+            blueprint.fields.forEach(field => {
+                const element = document.getElementById(field.name);
+                
+                if (field.type === 'file' && element && element.files && element.files[0]) {
+                    // Add the actual file (not base64)
+                    formDataObj.append(field.name, element.files[0]);
+                } else if (element) {
+                    // Add other form fields
+                    formDataObj.append(field.name, element.value);
+                }
+            });
+            
+            // Send as multipart/form-data (no Content-Type header needed)
+            response = await fetch(WORKFLOW_ENDPOINTS[currentWorkflow], {
+                method: 'POST',
+                body: formDataObj
+            });
+        } else {
+            // For other workflows, send as JSON
+            response = await fetch(WORKFLOW_ENDPOINTS[currentWorkflow], {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(formData)
+            });
+        }
+        
+        const data = await response.json();
+        
+        if (currentWorkflow === 'appointment-booking' && data.available_slots) {
+            availableSlots = data.available_slots;
+            renderAppointmentSlots();
+        } else {
+            showResponse(data);
+        }
+    } catch (error) {
+        showError(error.message);
+    } finally {
+        setButtonLoading('submit-btn', false);
+    }
+}
+
+async function handleCheckInventory() {
+    setButtonLoading('check-inventory-btn', true);
+    hideMessages();
+    
+    try {
+        const response = await fetch(WORKFLOW_ENDPOINTS[currentWorkflow], {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'}
+        });
+        
+        const data = await response.json();
+        showResponse(data);
+    } catch (error) {
+        showError(error.message);
+    } finally {
+        setButtonLoading('check-inventory-btn', false);
+    }
+}
+
+function renderAppointmentSlots() {
+    const container = document.getElementById('workflow-content');
+    
+    let html = `
+        <div class="bg-white shadow-lg rounded-xl p-8 space-y-8">
+            <h3 class="text-2xl font-bold text-blue-700 mb-4">Available Time Slots</h3>
+            <div class="grid gap-4 max-h-64 overflow-y-auto">
+                ${availableSlots.map((slot, index) => `
+                    <div onclick="selectSlot(${index})" id="slot-${index}"
+                         class="border rounded-lg p-5 cursor-pointer transition hover:shadow-md hover:border-blue-400">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="font-semibold text-lg">${slot.doctor_name}</p>
+                                <p class="text-sm text-gray-500">${slot.specialty || ''}</p>
+                                <p class="text-sm text-gray-600">${slot.date} | ${slot.start_time} - ${slot.end_time}</p>
+                            </div>
+                            <div id="selected-icon-${index}" class="hidden text-blue-600">✅</div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            
+            <h3 class="text-2xl font-bold text-blue-700 mb-4">Enter Your Details</h3>
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Patient Name *</label>
+                    <input type="text" id="confirm-patient_name" placeholder="Enter your full name" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                    <input type="email" id="confirm-email" placeholder="example@email.com" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
+                    <input type="tel" id="confirm-phone" placeholder="+966 5XXXXXXXX" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+            
+            <button id="confirm-appointment-btn" onclick="confirmAppointment()" class="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold py-4 px-6 rounded-xl shadow-md transition">
+                Confirm Appointment
+            </button>
+        </div>
+    `;
+    
+    container.innerHTML = html;
+}
+
+function selectSlot(index) {
+    selectedSlot = availableSlots[index];
+    
+    // Reset all slots
+    availableSlots.forEach((slot, i) => {
+        const card = document.getElementById(`slot-${i}`);
+        const icon = document.getElementById(`selected-icon-${i}`);
+        if (card) {
+            card.className = "border rounded-lg p-5 cursor-pointer transition hover:shadow-md hover:border-blue-400";
+        }
+        if (icon) {
+            icon.classList.add("hidden");
+        }
+    });
+    
+    // Highlight selected slot
+    const selectedCard = document.getElementById(`slot-${index}`);
+    const selectedIcon = document.getElementById(`selected-icon-${index}`);
+    if (selectedCard) {
+        selectedCard.className = "border-2 border-blue-600 rounded-lg p-5 bg-blue-50 shadow-md";
+    }
+    if (selectedIcon) {
+        selectedIcon.classList.remove("hidden");
+    }
+}
+
+async function confirmAppointment() {
+    if (!selectedSlot) {
+        alert('Please select a time slot');
+        return;
+    }
+    
+    const appointmentData = {
+        patient_name: document.getElementById('confirm-patient_name').value,
+        email: document.getElementById('confirm-email').value,
+        phone: document.getElementById('confirm-phone').value,
+        doctor: selectedSlot.doctor_name,
+        doctor_id: selectedSlot.doctor_id,
+        date: selectedSlot.date,
+        appointment_time: `${selectedSlot.start_time} - ${selectedSlot.end_time}`
+    };
+    
+    if (!appointmentData.patient_name || !appointmentData.email || !appointmentData.phone) {
+        alert('Please fill in all required fields');
+        return;
+    }
+    
+    setButtonLoading('confirm-appointment-btn', true);
+    hideMessages();
+    
+    try {
+        const response = await fetch(WORKFLOW_ENDPOINTS['appointment-booking-confirm'], {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(appointmentData)
+        });
+        
+        const data = await response.json();
+        showResponse(data);
+        
+        availableSlots = [];
+        selectedSlot = null;
+        renderForm(BLUEPRINTS[currentWorkflow]);
+    } catch (error) {
+        showError(error.message);
+    } finally {
+        setButtonLoading('confirm-appointment-btn', false);
+    }
+}
+
+// CHANGE 2: Enhanced response display with success alert
+function showResponse(response) {
+    const container = document.getElementById('response-container');
+    const content = document.getElementById('response-content');
+    
+    // Check if status is "received" and show success alert
+    if (response.status === "received" && response.message) {
+        content.innerHTML = `
+            <div class="success-alert flex items-start gap-3 p-5 bg-green-100 border-2 border-green-400 rounded-xl shadow-md">
+                <svg class="w-7 h-7 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div>
+                    <h4 class="text-xl font-bold text-green-800 mb-1">Success!</h4>
+                    <p class="text-green-700 text-base">${response.message}</p>
+                </div>
+            </div>
+        `;
+        container.classList.remove('hidden');
+        return;
+    }
+    
+    // Special case: appointment confirmations
+    if (currentWorkflow === 'appointment-booking' || currentWorkflow === 'appointment-booking-confirm') {
+        const r = response.result || response;
+        content.innerHTML = `
+            <div class="p-6 border rounded-xl bg-green-50 shadow">
+                <h3 class="text-2xl font-bold text-green-800 mb-4">Appointment Confirmed ✅</h3>
+                <p class="mb-2"><strong>Patient:</strong> ${r.patient_name || '-'}</p>
+                <p class="mb-2"><strong>Doctor:</strong> ${r.doctor || '-'}</p>
+                <p class="mb-2"><strong>Date:</strong> ${r.date || '-'}</p>
+                <p class="mb-2"><strong>Time:</strong> ${r.time || r.appointment_time || '-'}</p>
+                <p class="mt-4 text-green-700">A confirmation email will be sent to: ${r.email || '-'}</p>
+            </div>
+        `;
+    }
+    // Medical Record OCR - handle workflow start message
+    else if (currentWorkflow === 'medical-record-ocr') {
+        if (response.message) {
+            content.innerHTML = `
+                <div class="success-alert p-6 bg-blue-50 border-2 border-blue-400 rounded-xl">
+                    <div class="flex items-center gap-3 mb-4">
+                        <svg class="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <h4 class="text-xl font-bold text-blue-800">OCR Processing Started</h4>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg text-gray-800">
+                        <p class="leading-relaxed">${response.message}</p>
+                        <p class="text-sm text-gray-600 mt-3">📧 The extracted data will be processed and sent to the relevant parties.</p>
+                    </div>
+                </div>
+            `;
+        } else {
+            // Try to extract text from various possible response structures
+            let extractedText = response.extracted_data || response.text || response.ocr_text || response.data || response.result;
+            
+            // If it's still an object, try to get any text-like property
+            if (typeof extractedText === 'object' && extractedText !== null) {
+                extractedText = extractedText.text || extractedText.content || JSON.stringify(extractedText, null, 2);
+            }
+            
+            content.innerHTML = `
+                <div class="success-alert p-6 bg-blue-50 border-2 border-blue-400 rounded-xl">
+                    <div class="flex items-center gap-3 mb-4">
+                        <svg class="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <h4 class="text-xl font-bold text-blue-800">OCR Processing Complete</h4>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg space-y-2 text-gray-800">
+                        <p><strong>Extracted Text:</strong></p>
+                        <p class="whitespace-pre-wrap border-l-4 border-blue-300 pl-4 py-2">${extractedText || 'No text extracted'}</p>
+                    </div>
+                </div>
+            `;
+        }
+    }
+    // Symptoms Checker - handle response with status success and result
+    else if (currentWorkflow === 'symptoms-checker') {
+        let analysisText = '';
+        
+        if (response.status === 'success' && response.result) {
+            analysisText = response.result;
+        } else if (response.result) {
+            analysisText = response.result;
+        } else if (response.analysis) {
+            analysisText = response.analysis;
+        }
+        
+        content.innerHTML = `
+            <div class="success-alert p-6 bg-purple-50 border-2 border-purple-400 rounded-xl">
+                <div class="flex items-center gap-3 mb-4">
+                    <svg class="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <h4 class="text-xl font-bold text-purple-800">Symptom Analysis Complete</h4>
+                </div>
+                <div class="bg-white p-4 rounded-lg text-gray-800">
+                    <p class="whitespace-pre-wrap leading-relaxed">${analysisText || 'Analysis not available'}</p>
+                </div>
+            </div>
+        `;
+    }
+    // Patient Follow-Up - handle workflow start message
+    else if (currentWorkflow === 'patient-followup') {
+        if (response.message) {
+            content.innerHTML = `
+                <div class="success-alert p-6 bg-teal-50 border-2 border-teal-400 rounded-xl">
+                    <div class="flex items-center gap-3 mb-4">
+                        <svg class="w-7 h-7 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <h4 class="text-xl font-bold text-teal-800">Follow-Up Message Sent</h4>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg text-gray-800">
+                        <p class="leading-relaxed">${response.message}</p>
+                        <p class="text-sm text-gray-600 mt-3">📱 The patient will receive your follow-up message shortly.</p>
+                    </div>
+                </div>
+            `;
+        }
+    }
+    // Other workflows that return a summary
+    else if (response && response.summary) {
+        content.innerHTML = `<div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">${response.summary}</div>`;
+    }
+    // Default: show raw JSON for debugging or other workflows
+    else {
+        content.innerHTML = `<pre class="text-sm whitespace-pre-wrap">${JSON.stringify(response, null, 2)}</pre>`;
+    }
+    
+    container.classList.remove('hidden');
+}
+
+function showError(message) {
+    const container = document.getElementById('error-container');
+    container.textContent = `Error: ${message}`;
+    container.classList.remove('hidden');
+}
+
+function hideMessages() {
+    document.getElementById('response-container').classList.add('hidden');
+    document.getElementById('error-container').classList.add('hidden');
+}
+
+function toggleChat() {
+    document.getElementById('chatbot-window').classList.toggle('hidden');
+}
+
+function sendChatMessage() {
+    const input = document.getElementById('chat-input');
+    const message = input.value.trim();
+    
+    if (!message) return;
+    
+    const messagesContainer = document.getElementById('chat-messages');
+    messagesContainer.innerHTML += `<div class="bg-blue-100 p-3 rounded-lg ml-auto max-w-[80%] text-right">${message}</div>`;
+    input.value = '';
+    
+    setTimeout(() => {
+        messagesContainer.innerHTML += '<div class="bg-gray-100 p-3 rounded-lg mr-auto max-w-[80%]">Thank you for your message. Chatbot functionality will be available once configured.</div>';
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }, 500);
+}
+</script>
+</body>
+</html>
