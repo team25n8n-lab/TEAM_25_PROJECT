@@ -1,6 +1,6 @@
 # Cost Summaries - Healthcare Automation Workflows
 
-This document contains cost breakdowns for three automated healthcare workflow systems.
+This document contains cost breakdowns for automated healthcare workflow systems.
 
 ---
 
@@ -425,4 +425,137 @@ The **Pharmacy Inventory & Expiry Alert system runs for ~$20/month**, costs **un
 At scale (5,000 checks/month), your cost per symptom check drops to under **1 cent**, while providing instant, 24/7 automated medical information assistance.
 
 ---
+# Automated Appointment Management System
 
+## **EXECUTIVE SUMMARY & KEY BENEFITS**
+
+### Overview
+
+This proposal presents the cost and value of an Automated Appointment Management System that replaces manual scheduling with online booking and automated reminders.
+
+### Key Business Benefits
+
+- **Up to 96% cost savings** vs. manual scheduling
+- **Immediate ROI** (payback in as little as a few weeks)
+- **Reduced no-shows** with automated reminders
+- **Scales easily** as your practice grows
+- **99.9% system uptime** with secure cloud infrastructure
+
+### Included Core Features
+
+- Real-time appointment scheduling
+- Automatic conflict & double-booking prevention
+- Email confirmations + reminders (24-hour & 2-hour)
+- Secure patient data storage with backups
+- Analytics & appointment history
+
+## **IMPLEMENTATION & MONTHLY COSTS**
+
+### One-Time Implementation Cost
+
+**Total One-Time Setup: $1,250**
+
+| Item | Hours | Rate | Cost |
+|------|-------|------|------|
+| System Configuration & Setup | 8 hrs | $50/hrs | $400 |
+| Database Design & Integration | 3 hrs | $50/hrs | $150 |
+| Email Template Development | 2 hrs | $50/hrs | $100 |
+| Testing & Quality Assurance | 2 hrs | $50/hrs | $100 |
+| Staff Training & Documentation | - | $50/hrs | $200 |
+| Security & Compliance Review | - | $50/hrs | $300 |
+| Total One-Time Cost | | | $1250 |
+
+**Implementation Timeline:** 3-4 weeks from approval
+
+### Monthly Operating Costs (By Practice Size)
+
+#### Option A -- Small Clinic (≈100 appointments/month)
+
+| Monthly Services | Cost |
+|------------------|------|
+| Automation Platform | $20 |
+| Database Hosting | $0 |
+| Email Services | $0 |
+| Maintenance & Support | $375 |
+| Security & Backups | $100 |
+| **Total Monthly Cost** | **$495** |
+| **Cost per Appointment** | **$4.95** |
+
+#### Option B -- Medium Practice (≈500 appointments/month)
+
+| Monthly Services | Cost |
+|------------------|------|
+| Automation Platform | $20 |
+| Email Services | $12 |
+| Maintenance & Support | $375 |
+| Security & Backups | $100 |
+| Scalability Reserve | $51 |
+| **Total Monthly Cost** | **$558** |
+| **Cost per Appointment** | **$1.12** |
+
+#### Option C -- Large Practice / Hospital (≈2,000 appointments/month)
+
+| Monthly Services | Cost |
+|------------------|------|
+| Automation Platform | $50 |
+| Database Hosting | $25 |
+| Email Services | $32 |
+| Maintenance & Support | $375 |
+| Security & Backups | $140 |
+| Scalability Reserve | $93 |
+| **Total Monthly Cost** | **$715** |
+| **Cost per Appointment** | **$0.36** |
+
+## **ROI, SAVINGS & NEXT STEPS**
+
+### Cost Comparison (Manual vs Automated)
+
+**Manual Scheduling Cost (Industry Average):** $8.10 per appointment
+
+| Monthly Volume | Manual Cost | Automated Cost | Monthly Savings | Annual Savings |
+|----------------|-------------|----------------|-----------------|----------------|
+| 100 appts | $810 | $495 | $315 | $3,780 |
+| 500 appts | $4,050 | $558 | $3,492 | $41,904 |
+| 2,000 appts | $16,200 | $715 | $15,485 | $185,821 |
+| 5,000 appts | $40,500 | $1,280 | $39,220 | $470,641 |
+
+### Additional Value (Not Directly Priced)
+
+- 20-50% reduction in no-shows
+- Hundreds of staff hours freed per month
+- Improved patient satisfaction
+- 24/7 appointment availability
+- Zero scheduling errors
+
+### Recommended Starting Package
+
+**Best for most practices:** Up to 500 appointments/month
+
+| Cost Summary | Amount |
+|--------------|--------|
+| One-Time Setup | $1,250 |
+| First Month Operations | $495 |
+| **Total First Month Investment** | **$1,745** |
+
+**Ongoing:** Month-to-month, no long-term contract
+
+### Total Cost of Ownership -- Year 1
+
+| Practice Size | Year 1 Cost | Estimated Savings |
+|---------------|-------------|-------------------|
+| Small (100/mo) | $9,065 | $655 |
+| Medium (500/mo) | $9,821 | $38,779 |
+| Large (2,000/mo) | $11,704 | $182,696 |
+
+### Next Steps
+
+1. **30-Minute Consultation** -- Review your needs
+2. **Final Customized Quote** -- Delivered within 48 hours
+3. **System Launch** -- Live in 3-4 weeks
+
+### Contact Information
+
+📧 Email: nabeeljaan165@gmail.com  
+📞 Phone: +92-302-5699759
+
+*Prepared by Nabeel Jaan*
