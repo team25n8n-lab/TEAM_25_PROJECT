@@ -425,7 +425,7 @@ The **Pharmacy Inventory & Expiry Alert system runs for ~$20/month**, costs **un
 At scale (5,000 checks/month), your cost per symptom check drops to under **1 cent**, while providing instant, 24/7 automated medical information assistance.
 
 ---
-# Automated Appointment Management System
+## 3. Cost Summary of  Automated Appointment Management System
 
 ## **EXECUTIVE SUMMARY & KEY BENEFITS**
 
