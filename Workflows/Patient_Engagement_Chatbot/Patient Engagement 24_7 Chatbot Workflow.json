@@ -1,0 +1,1296 @@
+{
+  "name": "7. Patient Engagement 24/7 Chatbot Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "hospitalName",
+              "value": "SmartCare Hospital",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "hospitalCity",
+              "value": "Riyadh, Saudi Arabia",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "workingHours",
+              "value": "Outpatient: 9 AM – 5 PM, Emergency: 24/7",
+              "type": "string"
+            },
+            {
+              "id": "id-4",
+              "name": "contactPhone",
+              "value": "+966-555-000000",
+              "type": "string"
+            },
+            {
+              "id": "id-5",
+              "name": "contactEmail",
+              "value": "info@smarthospital.com",
+              "type": "string"
+            },
+            {
+              "id": "id-6",
+              "name": "website",
+              "value": "smartcarehospital.com",
+              "type": "string"
+            },
+            {
+              "id": "id-7",
+              "name": "services",
+              "value": "Cardiology, Dermatology, Neurology, Pediatrics, Orthopedics, General Medicine, ENT, Gynecology",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "fd71a7b6-91df-49c9-a598-6bd68085cc81",
+      "name": "Workflow Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3424,
+        -784
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body || $json;\nconst message = body.message || body.text || '';\nconst sessionId = body.session_id || body.sessionId || 'web-session-' + Date.now();\n\nreturn [{\n  json: {\n    user_message: message.toString().trim(),\n    sessionId: sessionId,   // 👈 use camelCase\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "abe9fbcd-8d3e-4983-abff-efce2923a24f",
+      "name": "Normalize Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3136,
+        -784
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.user_message }}",
+        "options": {
+          "systemMessage": "You are an intent classification system.\n\nClassify the user message into ONE category:\n\n- general\n- appointment_info\n- contact\n- location\n- insurance\n- pricing\n- emergency\n- unknown\n\nReturn ONLY valid JSON in this format:\n{\n  \"intent\": \"category_name\"\n}\n\nNo explanations. No markdown."
+        }
+      },
+      "id": "12316dd6-3c62-415e-b555-9a54065056b3",
+      "name": "Intent Classifier Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -2848,
+        -784
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "general",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "de0265f6-f4fd-4750-a596-5bb2380eb1cb"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "appointment_info",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "b4cbd289-f8d7-4a9a-a133-1a606c7535b8"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "contact",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "4bb51ae1-d855-4739-8794-df0bd1d09184"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "location",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "e228b371-4d0e-479b-85dc-7f2df94d9c85"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "insurance",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "7aaf38dc-3392-4df5-bed5-ec34c8d16b81"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "pricing",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "9cfa287d-2ec7-4158-bddb-9a91f016490e"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "emergency",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "ec911878-86ef-43ad-a338-2eb4dddf57b2"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "unknown",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "bdf726b7-cd46-4174-aa54-33f494ce9863"
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "Fallback"
+        }
+      },
+      "id": "1aa04b0a-62ec-416b-bdc0-d24a3df7753c",
+      "name": "Route by Intent",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        -2128,
+        -1104
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "user_message",
+              "value": "={{ $('Normalize Input').first().json.user_message }}",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "context",
+              "value": "To book an appointment: 1) Visit our website or call our reception. 2) Check available slots with our staff. 3) You will receive a confirmation message via SMS or email. 4) If no slots are available, we will add you to our waiting list and notify you when slots open up.",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "5c8ea7cf-1271-4b69-a451-3dd656161f17",
+      "name": "Prepare Appointment Info",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1328,
+        -1680
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "user_message",
+              "value": "={{ $('Normalize Input').first().json.user_message }}",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "context",
+              "value": "Healthcare Automation Agency contact information - Phone: +966-555-000000, Email: info@Healthcare.com, Website: https//:healthcare.com, Location: Riyadh, Saudi Arabia",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "e995f53c-176b-40d6-b74b-84ab155c2833",
+      "name": "Prepare Contact Info",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1328,
+        -1488
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "user_message",
+              "value": "={{ $('Normalize Input').first().json.user_message }}",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "context",
+              "value": "Healthcare Automation Agency is located in Riyadh, Saudi Arabia. For detailed directions, please visit our website at https//:healthcare.com or call us at +966-555-000000.",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "befb5b5e-c80f-4c04-8e0a-e300996ab814",
+      "name": "Prepare Location Info",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1328,
+        -1296
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "user_message",
+              "value": "={{ $('Normalize Input').first().json.user_message }}",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "context",
+              "value": "We accept most major insurance providers.\"Bupa Arabia\" \"Al Rajhi Takaful\"  \"MedGulf (Mediterranean & Gulf)\"\" Walaa Cooperative Insurance\". For specific coverage details and to verify if your insurance is accepted, please contact our billing department at +966-555-000000 or email info@healthcare.com",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "ee679d26-8a29-40c7-a385-c4cec00cd4f1",
+      "name": "Prepare Insurance Info",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1328,
+        -1104
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "user_message",
+              "value": "={{ $('Normalize Input').first().json.user_message }}",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "context",
+              "value": "For accurate pricing information, please contact our reception at +966-555-000000. Pricing varies based on services, insurance coverage, and specific treatments.",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "8cbf84ee-ebfa-4ff9-a086-f0f30cb878be",
+      "name": "Prepare Pricing Info",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1328,
+        -912
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "user_message",
+              "value": "={{ $('Normalize Input').first().json.user_message }}",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "context",
+              "value": "Our emergency department is open 24/7. For life-threatening emergencies, please call emergency services immediately or come directly to our emergency department. For non-urgent matters, please call +966-555-000000. Note: We cannot provide medical advice through this chat.",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "fc9d716b-f8a9-4d9b-8864-efd8aa7357da",
+      "name": "Prepare Emergency Info",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1328,
+        -720
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "user_message",
+              "value": "={{ $('Normalize Input').first().json.user_message }}",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "context",
+              "value": "I am here to help with information about SmartCare Hospital. I can assist with: hospital services, doctor information, appointments, contact details, location, insurance, and general inquiries. Could you please rephrase your question?",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "4ae56423-3452-484b-9723-2a8c5985e593",
+      "name": "Prepare Unknown Response",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1328,
+        -528
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=User question: {{ $json.user_message }}\n\nContext: {{ $json.context }}",
+        "options": {
+          "systemMessage": "You are the SmartCare Hospital AI Assistant.\n\nRules:\n1. NEVER provide medical advice, diagnosis, or treatment recommendations.\n2. ONLY use the provided context.\n3. If context is insufficient, say so politely.\n4. Be concise, friendly, and professional.\n\nRespond in plain text only."
+        }
+      },
+      "id": "a1096f63-88a6-40ca-9107-5e9afee7caee",
+      "name": "Response Builder Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -608,
+        -1184
+      ]
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Normalize Input').first().json.sessionId }}",
+        "contextWindowLength": 10
+      },
+      "id": "c5c4e36f-e56b-4a45-8a3a-1d48f2d4f751",
+      "name": "Conversation Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -2288,
+        -1472
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get raw string\nconst raw = $json[\"output\"] || \"\";\n\n// Remove markdown code block wrappers ```json ... ```\nconst cleaned = raw\n  .replace(/```json/gi, \"\")\n  .replace(/```/g, \"\")\n  .trim();\n\nlet parsed;\ntry {\n  parsed = JSON.parse(cleaned);\n} catch (e) {\n  parsed = { error: \"Invalid JSON\", cleaned };\n}\n\n// Return clean JSON\nreturn [\n  {\n    json: parsed\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2336,
+        -992
+      ],
+      "id": "ce487a79-9278-4356-8ef0-c968c96f5eff",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -2784,
+        -560
+      ],
+      "id": "d6c7cf8b-55e7-45ff-ad38-58dd783aae3a",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "jTywaPAPNBFR9V7Y",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -512,
+        -928
+      ],
+      "id": "34e14898-c2f7-4a3b-a93b-8d2801c21773",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "jTywaPAPNBFR9V7Y",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Normalize Input').first().json.user_message }}",
+        "options": {
+          "systemMessage": "You are Nabeel Jaan, a conversational assistant for SmartCare Hospital.\n\n**Your capabilities:**\n- Answer questions about hospital services, facilities, doctors, departments\n- Use the knowledge base tool to retrieve accurate information\n- Maintain conversation context and remember what was discussed\n- Handle follow-up questions naturally\n- Be friendly, professional, and helpful\n\n**CRITICAL RULES:**\n1. NEVER provide medical advice, diagnosis, or treatment recommendations\n2. ONLY use information from the knowledge base tool\n3. Do NOT hallucinate or invent information\n4. If asked for medical advice, respond: \"I can help with general hospital information, but I cannot provide medical advice. Please contact our hospital directly at +966-555-000000.\"\n5. If information is not in the knowledge base, say so clearly and offer to help with something else\n\n**Conversation style:**\n- Be warm and conversational\n- Ask clarifying questions when needed\n- Acknowledge previous messages in the conversation\n- Provide complete, helpful answers\n\n**Hospital Contact Info:**\n- Phone: +966-555-000000\n- Email: info@smarthospital.com\n- Website: smartcarehospital.com\n- Location: Riyadh, Saudi Arabia\n- Hours: Outpatient 9 AM – 5 PM, Emergency 24/7"
+        }
+      },
+      "id": "89a20fe1-6ae0-454c-b7c5-b8745aa15fd1",
+      "name": "Knowledge Base Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -2464,
+        -1728
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "98a5b3c2-fd96-4191-af1e-f2121ab3e5be",
+      "name": "OpenAI Chat Model2",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -2448,
+        -1488
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "jTywaPAPNBFR9V7Y",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "binaryMode": "specificField",
+        "loader": "pdfLoader",
+        "options": {}
+      },
+      "id": "db93fd8a-3493-4aa7-9a7e-0b847c2c8193",
+      "name": "Document Loader",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        -3152,
+        -1376
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {
+          "queryName": "match_documents"
+        }
+      },
+      "id": "6b8778f4-a165-4fe3-8bdf-bf7ad62c916b",
+      "name": "Supabase Vector Store Insert",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        -3280,
+        -1600
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "upC1Iy4Y3nQa2gQX",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "448f4360-08bb-488e-9d2e-29c0c9ac8900",
+      "name": "OpenAI Embeddings1",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -3280,
+        -1376
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "jTywaPAPNBFR9V7Y",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Search the hospital knowledge base for information about services, facilities, doctors, departments, working hours, and general hospital information. Use this tool whenever you need to answer questions about the hospital.",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        -2128,
+        -1472
+      ],
+      "id": "597c7a27-20e0-4268-b1ab-3b23d0a63006",
+      "name": "Supabase Vector Store",
+      "credentials": {
+        "supabaseApi": {
+          "id": "upC1Iy4Y3nQa2gQX",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -3728,
+        -1504
+      ],
+      "id": "140b5b16-3b52-4367-8784-df67df5d7dcf",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "16EEgItjgn_-_urm_utN2LkEQrJm4afKb",
+          "mode": "list",
+          "cachedResultName": "hospital Knowledge.pdf",
+          "cachedResultUrl": "https://drive.google.com/file/d/16EEgItjgn_-_urm_utN2LkEQrJm4afKb/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -3504,
+        -1504
+      ],
+      "id": "8e3905a5-6962-4ae0-b7b6-73ed70f92a99",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Mkx5aoXVrkAZIq1U",
+          "name": "Google Drive account project name team project25"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chatbot",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -3648,
+        -784
+      ],
+      "id": "70730556-1038-4df7-a373-35651d035ae8",
+      "name": "Webhook",
+      "webhookId": "cc9b9340-d418-4ec0-8836-bd318aad9acd"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "47a27952-7d1d-436a-bb22-ab97a46ed94e",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        128,
+        -1184
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $json;\nlet reply = '';\n\nif (data.output) {\n  reply = data.output.toString().trim();\n} else if (data.text) {\n  reply = data.text.toString().trim();\n} else {\n  reply = 'I apologize, but I encountered an issue processing your request. Please try again.';\n}\n\nreturn [{\n  json: {\n    reply: reply,\n    session_id: $('Normalize Input').first().json.session_id,\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "9871ce3d-a914-4740-932c-87bd46cb06b5",
+      "name": "Format Final Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -144,
+        -1184
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Chatbot Intake & Intent Classification Workflow\n**Receives user messages via webhook, normalizes input, \napplies hospital configuration, and classifies intent for downstream routing.**\n\n",
+        "height": 592,
+        "width": 1248,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -3872,
+        -960
+      ],
+      "id": "33890c8c-fb00-4b32-a97d-35cbf1d70fc2",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Intent-Based Routing Workflow\n**Cleans and parses the classifier output, then directs messages to the correct intent branch\n (general, appointment, contact, location, insurance, pricing, emergency, unknown).**\n",
+        "height": 944,
+        "width": 928
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2624,
+        -1312
+      ],
+      "id": "72c2cc61-ff2c-44d6-90dd-652b5b3aa4e2",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Knowledge Base Document Ingestion Workflow\n**Downloads hospital documents, generates embeddings, \nand stores them in Supabase vector storage for AI-powered search.**\n",
+        "height": 1008,
+        "width": 1248,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -3872,
+        -1968
+      ],
+      "typeVersion": 1,
+      "id": "9e1a03a9-5b57-4e3e-babb-93935a66b866",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## RAG AI Agent \n**Maintains session-based conversation context, retrieves verified hospital information from the vector database, and generates safe, non-medical responses** \n.\n",
+        "height": 656,
+        "width": 928,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2624,
+        -1968
+      ],
+      "typeVersion": 1,
+      "id": "5ec3ad14-07da-42bd-84d1-6dc78c56375d",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Predefined Context Response Provider \n**Supplies approved, non-medical hospital information (appointments, contact, location, insurance, pricing, emergency) based on detected user intent.**\n",
+        "height": 1600,
+        "width": 768,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1696,
+        -1968
+      ],
+      "typeVersion": 1,
+      "id": "fda409a7-12ab-46d3-be60-21e6c87ce3fe",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## AI Response Generation & Safety Layer\n**Builds final chatbot replies using approved context only, enforces medical safety rules, \nand returns a clean JSON response to the webhook.**\n",
+        "height": 1600,
+        "width": 1248,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -928,
+        -1968
+      ],
+      "typeVersion": 1,
+      "id": "3083a770-acdb-4b01-a24e-b268d1634239",
+      "name": "Sticky Note5"
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "newteam25.app.n8n.cloud",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0",
+            "content-length": "16",
+            "accept": "*/*",
+            "accept-encoding": "gzip, br",
+            "accept-language": "en-US,en;q=0.9",
+            "cdn-loop": "cloudflare; loops=1; subreqs=1",
+            "cf-connecting-ip": "2001:16a4:217:9fd1:3caf:97fe:fba6:bad7",
+            "cf-ew-via": "15",
+            "cf-ipcountry": "SA",
+            "cf-ray": "9af4f5e8d715a6f7-LHR",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "cf-worker": "n8n.cloud",
+            "content-type": "application/json",
+            "origin": "null",
+            "priority": "u=1, i",
+            "sec-ch-ua": "\"Microsoft Edge\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "cross-site",
+            "x-forwarded-for": "2001:16a4:217:9fd1:3caf:97fe:fba6:bad7, 172.64.192.25",
+            "x-forwarded-host": "newteam25.app.n8n.cloud",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "traefik-prod-users-gwc-80-5fc4f59987-jxvcn",
+            "x-is-trusted": "yes",
+            "x-real-ip": "2001:16a4:217:9fd1:3caf:97fe:fba6:bad7"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "message": "hi"
+          },
+          "webhookUrl": "https://newteam25.app.n8n.cloud/webhook/chatbot",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Workflow Configuration": {
+      "main": [
+        [
+          {
+            "node": "Normalize Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Input": {
+      "main": [
+        [
+          {
+            "node": "Intent Classifier Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Intent Classifier Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Intent": {
+      "main": [
+        [
+          {
+            "node": "Knowledge Base Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Appointment Info",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Contact Info",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Location Info",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Insurance Info",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Pricing Info",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Emergency Info",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Unknown Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Appointment Info": {
+      "main": [
+        [
+          {
+            "node": "Response Builder Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Contact Info": {
+      "main": [
+        [
+          {
+            "node": "Response Builder Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Location Info": {
+      "main": [
+        [
+          {
+            "node": "Response Builder Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Insurance Info": {
+      "main": [
+        [
+          {
+            "node": "Response Builder Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Pricing Info": {
+      "main": [
+        [
+          {
+            "node": "Response Builder Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Emergency Info": {
+      "main": [
+        [
+          {
+            "node": "Response Builder Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Unknown Response": {
+      "main": [
+        [
+          {
+            "node": "Response Builder Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Route by Intent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Intent Classifier Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Response Builder Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Knowledge Base Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Document Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Supabase Vector Store Insert",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Embeddings1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store Insert",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "Knowledge Base Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Supabase Vector Store Insert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conversation Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Knowledge Base Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Workflow Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Knowledge Base Agent": {
+      "main": [
+        [
+          {
+            "node": "Format Final Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Response Builder Agent": {
+      "main": [
+        [
+          {
+            "node": "Format Final Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Final Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b47f72c1-a41a-4847-acb3-78d56218042d",
+  "meta": {
+    "instanceId": "d6d568813a88aea710aa5796ea28840c458ade99e5fe88b00dc7056afbfca8d0"
+  },
+  "id": "PhA2Wk594FXmIoiF",
+  "tags": []
+}
