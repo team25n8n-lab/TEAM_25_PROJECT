@@ -793,3 +793,315 @@ __
 ---
 
 **Document Version:** 1.0 | **Date:** December 19, 2025
+
+# Automated Patient Follow-Up & Reminder Management System
+
+*(n8n-Based -- Gmail, Supabase & AI-Powered)*
+
+## EXECUTIVE SUMMARY & KEY BENEFITS
+
+### Overview
+
+This proposal outlines the cost and value of an **Automated Patient Follow-Up & Reminder Management System** built using **n8n automation**, **Supabase database**, **Gmail notifications**, and **AI-generated communication**.
+
+The system replaces manual patient follow-ups, reminder calls, and daily reporting with a fully automated, secure, and scalable workflow.
+
+### Key Business Benefits
+
+- Up to **95% reduction** in manual follow-up effort
+- Significant **reduction in missed appointments**
+- AI-generated professional communication (emails & reports)
+- Centralized audit logging for compliance & tracking
+- Scales easily from small clinics to hospitals
+- Secure cloud-based infrastructure with high availability
+
+### Included Core Features
+
+- Frontend patient intake via webhook
+- Automated follow-up scheduling & storage
+- Daily appointment reminder emails
+- Patient self-response (Yes / No / Reschedule)
+- Real-time status updates
+- AI-generated reminder content
+- AI-generated daily doctor summary reports
+- Full audit trail (intake, reminders, replies, summaries)
+
+## IMPLEMENTATION & ONE-TIME COSTS
+
+### One-Time Implementation Cost
+
+**Total One-Time Setup: $1,450**
+
+| **Item** | **Hours** | **Rate** | **Cost** |
+|----------|-----------|----------|----------|
+| Workflow Architecture & Design (3 triggers, 3 flows) | 6 hrs | $50/hr | $300 |
+| Supabase Database Design (followups + audit_log) | 4 hrs | $50/hr | $200 |
+| Webhook Intake & Patient Reply Logic | 3 hrs | $50/hr | $150 |
+| Gmail Reminder & Summary Templates (HTML) | 4 hrs | $50/hr | $200 |
+| AI Prompt Engineering (Reminders + Reports) | 3 hrs | $50/hr | $150 |
+| Testing & Quality Assurance | 3 hrs | $50/hr | $150 |
+| Security, Validation & Error Handling | --- | --- | $150 |
+| Documentation & Handover | --- | --- | $150 |
+
+**Total One-Time Cost: $1,450**
+
+**Implementation Timeline:** 3--4 weeks from approval
+
+## MONTHLY OPERATING COSTS (BY USAGE)
+
+### Assumptions (Used for Cost Modeling)
+
+- Gmail used for all emails
+- Supabase Free / Starter tier initially
+- OpenAI GPT-4o for content generation
+- n8n Cloud or Self-Hosted equivalent
+- Average reminder length: short text + HTML
+
+### Option A -- Small Clinic
+
+≈ **100 follow-ups per month**
+
+#### Monthly Services Cost
+
+| **Service** | **Cost** |
+|-------------|----------|
+| n8n Automation Platform | $20 |
+| Supabase Database Hosting | $0 |
+| Gmail Email Sending | $0 |
+| OpenAI API (≈300 AI calls/month) | $6 |
+| Maintenance & Monitoring | $300 |
+| Security & Backups | $80 |
+
+**Total Monthly Cost: $406**  
+**Cost per Follow-up: $4.06**
+
+### Option B -- Medium Clinic
+
+≈ **500 follow-ups per month**
+
+#### Monthly Services Cost
+
+| **Service** | **Cost** |
+|-------------|----------|
+| n8n Automation Platform | $20 |
+| Supabase Database Hosting | $0 |
+| Gmail Email Sending | $0 |
+| OpenAI API (≈1,500 AI calls/month) | $25 |
+| Maintenance & Monitoring | $300 |
+| Security & Backups | $100 |
+| Scalability Reserve | $35 |
+
+**Total Monthly Cost: $480**  
+**Cost per Follow-up: $0.96**
+
+### Option C -- Large Practice / Hospital
+
+≈ **2,000 follow-ups per month**
+
+#### Monthly Services Cost
+
+| **Service** | **Cost** |
+|-------------|----------|
+| n8n Automation Platform | $50 |
+| Supabase Hosting (Higher Tier) | $25 |
+| Gmail Email Sending | $0 |
+| OpenAI API (≈6,000 AI calls/month) | $90 |
+| Maintenance & Monitoring | $350 |
+| Security & Backups | $140 |
+| Scalability Reserve | $60 |
+
+**Total Monthly Cost: $715**  
+**Cost per Follow-up: $0.36**
+
+## COST BREAKDOWN BY WORKFLOW COMPONENT
+
+### Triggers & Executions
+
+| **Trigger** | **Frequency** |
+|-------------|---------------|
+| Frontend Intake Webhook | Per patient submission |
+| Daily Reminder Trigger | Once daily (9 AM) |
+| Patient Reply Webhook | Event-based |
+| Daily Summary Trigger | Once daily (7 PM) |
+
+### External Integrations Used
+
+- **Supabase** -- Data storage, updates, audit logs
+- **Gmail API** -- Reminder & summary emails
+- **OpenAI GPT-4o** -- Email + report generation
+- **n8n Scheduler & Webhooks** -- Orchestration
+
+## ROI, SAVINGS & BUSINESS IMPACT
+
+### Manual vs Automated Follow-ups
+
+**Industry Average Manual Cost:** ~$7.50 per follow-up
+
+| **Monthly Volume** | **Manual Cost** | **Automated Cost** | **Monthly Savings** | **Annual Savings** |
+|-------------------|-----------------|-------------------|--------------------|--------------------|
+| 100 | $750 | $406 | $344 | $4,128 |
+| 500 | $3,750 | $480 | $3,270 | $39,240 |
+| 2,000 | $15,000 | $715 | $14,285 | $171,420 |
+
+## ADDITIONAL VALUE (NOT DIRECTLY PRICED)
+
+- 20--50% reduction in missed appointments
+- Doctors receive **daily actionable insights**
+- Patients respond without staff involvement
+- Zero follow-up tracking errors
+- Fully auditable communication history
+- Professional AI-written communication
+
+## RECOMMENDED STARTING PACKAGE
+
+**Best for most clinics:** Up to **500 follow-ups/month**
+
+| **Cost Summary** | **Amount** |
+|------------------|------------|
+| One-Time Setup | $1,450 |
+| First Month Operations | $406 |
+| **Total First Month Investment** | **$1,856** |
+
+Ongoing: Month-to-month, no long-term contract
+
+## TOTAL COST OF OWNERSHIP -- YEAR 1
+
+| **Clinic Size** | **Year 1 Cost** | **Estimated Savings** |
+|----------------|-----------------|----------------------|
+| Small (100/mo) | $6,322 | $3,678 |
+| Medium (500/mo) | $7,210 | $37,790 |
+| Large (2,000/mo) | $10,030 | $170,970 |
+
+## NEXT STEPS
+
+1. Workflow Review & Customization
+2. Final Cost Confirmation
+3. Deployment & Go-Live (3--4 weeks)
+
+### Prepared by
+
+**Name: Hafiz Ahmad Adil**
+
+**Email:** ahmad.adil.gudgk@gmail.com
+
+**Phone: +923336461617**
+
+Automation Engineer | AI Workflow Specialist
+
+# Medical Record OCR Automation System -- Cost Estimation
+
+## EXECUTIVE SUMMARY & KEY BENEFITS
+
+### Overview
+
+This document provides a cost estimation for a Medical Record OCR Automation System built using n8n. The workflow automates medical document upload, OCR processing, AI-based patient data extraction, and secure storage in Supabase.
+
+### Key Business Benefits
+
+- Eliminates manual data entry from medical records
+- Faster patient onboarding and record digitization
+- AI-powered OCR and structured data extraction
+- Secure cloud-based medical record storage
+- Scalable for clinics, labs, and hospitals
+
+## CORE WORKFLOW FEATURES
+
+- File upload via webhook
+- OCR processing of scanned medical documents
+- AI-based patient data extraction (Name, Age, Diagnosis, etc.)
+- Structured JSON formatting
+- Secure Supabase database storage
+- Error handling and audit logging
+
+## IMPLEMENTATION & ONE-TIME COSTS
+
+**Total One-Time Setup: $1,350**
+
+| **Item** | **Cost** |
+|----------|----------|
+| Workflow Design & OCR Integration | $350 |
+| AI Prompt Engineering & Data Mapping | $250 |
+| Supabase Database Schema & Integration | $200 |
+| Webhook & File Handling Setup | $150 |
+| Testing & Quality Assurance | $150 |
+| Security, Validation & Documentation | $250 |
+
+**Implementation Timeline:** 3 weeks
+
+## MONTHLY OPERATING COSTS (BY USAGE)
+
+### Small Clinic (≈100 records/month)
+
+| **Service** | **Cost** |
+|-------------|----------|
+| n8n Automation Platform | $20 |
+| OCR API Usage | $15 |
+| OpenAI API (Extraction) | $20 |
+| Supabase Hosting | $0 |
+| Maintenance & Support | $250 |
+| Security & Backups | $75 |
+
+**Total Monthly Cost: $380**  
+**Cost per Record: $3.80**
+
+### Medium Clinic (≈500 records/month)
+
+| **Service** | **Cost** |
+|-------------|----------|
+| n8n Automation Platform | $20 |
+| OCR API Usage | $60 |
+| OpenAI API (Extraction) | $70 |
+| Supabase Hosting | $0 |
+| Maintenance & Support | $250 |
+| Security & Backups | $100 |
+| Scalability Reserve | $30 |
+
+**Total Monthly Cost: $530**  
+**Cost per Record: $1.06**
+
+### Large Hospital (≈2,000 records/month)
+
+| **Service** | **Cost** |
+|-------------|----------|
+| n8n Automation Platform | $50 |
+| OCR API Usage | $200 |
+| OpenAI API (Extraction) | $180 |
+| Supabase Hosting | $25 |
+| Maintenance & Support | $300 |
+| Security & Backups | $140 |
+| Scalability Reserve | $60 |
+
+**Total Monthly Cost: $955**  
+**Cost per Record: $0.48**
+
+## ROI & COST SAVINGS
+
+**Manual Data Entry Cost (Average):** $6.50 per record
+
+| **Monthly Volume** | **Annual Savings** |
+|-------------------|--------------------|
+| 100 records/month | $3,840 |
+| 500 records/month | $33,840 |
+| 2,000 records/month | $144,600 |
+
+## RECOMMENDED PACKAGE
+
+**Best for most clinics:** Up to 500 records/month
+
+| **Cost Summary** | **Amount** |
+|------------------|------------|
+| One-Time Setup | $1,350 |
+| First Month Operations | $380 |
+| **Total First Month Investment** | **$1,730** |
+
+---
+
+### Prepared by
+
+**Name: Hafiz Ahmad Adil**
+
+**Email:** ahmad.adil.gudgk@gmail.com
+
+**Phone: +923336461617**
+
+Automation Engineer | AI Workflow Specialist
